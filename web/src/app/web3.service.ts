@@ -1,7 +1,4 @@
-declare let require: any;
-declare let web3: any;
-declare let ethereum: any;
-declare let window: any;
+import {ConfigurationService} from './configuration.service';
 
 import {Injectable} from '@angular/core';
 import Squarelink from 'squarelink';
@@ -18,6 +15,11 @@ import createLedgerSubprovider from '@ledgerhq/web3-subprovider';
 import Web3 from 'web3';
 import {Subject} from 'rxjs';
 import {Bitski} from 'bitski';
+
+declare let require: any;
+declare let web3: any;
+declare let ethereum: any;
+declare let window: any;
 
 @Injectable({
     providedIn: 'root'
@@ -40,7 +42,9 @@ export class Web3Service {
     connectEvent = new Subject<any>();
     disconnectEvent = new Subject<void>();
 
-    constructor() {
+    constructor(
+        private configurationService: ConfigurationService
+    ) {
 
         this.txProviderName = localStorage.getItem('txProviderName');
         this.initWeb3();
@@ -57,7 +61,7 @@ export class Web3Service {
 
         engine.addProvider(
             new WebsocketSubprovider({
-                rpcUrl: 'wss://mainnet.infura.io/ws/v3/6705b777fb0b453ca5d6e33b2da3b6a9'
+                rpcUrl: 'wss://mainnet.infura.io/ws/v3/' + this.configurationService.INFURA_KEY
             })
         );
 
