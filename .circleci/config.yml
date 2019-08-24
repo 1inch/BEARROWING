@@ -17,15 +17,19 @@ jobs:
             - checkout
             - restore_cache:
                   keys:
-                      - v2-dependencies-{{ checksum "web/package.json" }}
+                      - v2-dependencies-{{ checksum "package.json" }}-{{ checksum "web/package.json" }}
                       - v2-dependencies-
             - run:
-                  name: Install dependencies
+                  name: Install build dependencies
+                  command: yarn install --frozen-lockfile
+            - run:
+                  name: Install web dependencies
                   command: cd web && yarn install --frozen-lockfile
             - save_cache:
                   paths:
+                      - node_modules
                       - web/node_modules
-                  key: v2-dependencies-{{ checksum "web/package.json" }}
+                  key: v2-dependencies-{{ checksum "package.json" }}-{{ checksum "web/package.json" }}
             #      - run:
             #          name: Run lint
             #          command: yarn run lint
