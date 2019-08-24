@@ -998,20 +998,22 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
         uint256 collateralAmount,
         ICERC20 borrowedToken,
         IERC20 borrowedUnderlyingToken,
-        uint256 borrowedAmount
+        uint256 borrowedAmount,
+        address msgSender
     )
         public
         withLoan(
             pool,
             borrowedUnderlyingToken,
-            borrowedAmount = borrowedToken.borrowBalanceCurrent(msg.sender)
+            borrowedAmount = borrowedToken.borrowBalanceCurrent(msgSender)
         )
     {
         LoanHolder holder = new LoanHolder();
 
         // Extract loan
-        borrowedToken.repayBorrowBehalf(msg.sender, borrowedAmount);
-        collateralToken.universalTransferFrom(msg.sender, address(holder), collateralAmount);
+        borrowedUnderlyingToken.universalApprove(borrowedToken, borrowedAmount);
+        borrowedToken.repayBorrowBehalf(msgSender, borrowedAmount);
+        collateralToken.universalTransferFrom(msgSender, address(holder), collateralAmount);
 
         // Create new loan
         holder.perform(address(borrowedToken), 0, abi.encodeWithSelector(
@@ -1020,7 +1022,7 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
         ));
 
         // Transfer loan
-        _mint(msg.sender, uint256(address(holder)));
+        _mint(msgSender, uint256(address(holder)));
     }
 
     function enterMarkets(

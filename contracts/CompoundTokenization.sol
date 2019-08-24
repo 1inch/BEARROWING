@@ -44,12 +44,13 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
         withLoan(
             pool,
             borrowedUnderlyingToken,
-            borrowedAmount = borrowedToken.borrowBalanceCurrent(msg.sender)
+            borrowedAmount = borrowedToken.borrowBalanceCurrent(msgSender)
         )
     {
         LoanHolder holder = new LoanHolder();
 
         // Extract loan
+        borrowedUnderlyingToken.universalApprove(borrowedToken, borrowedAmount);
         borrowedToken.repayBorrowBehalf(msgSender, borrowedAmount);
         collateralToken.universalTransferFrom(msgSender, address(holder), collateralAmount);
 
