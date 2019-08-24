@@ -6,7 +6,13 @@ import {NoContentComponent} from './no-content/no-content.component';
 const routes = [
     {
         path: '',
-        component: BaseComponent
+        component: BaseComponent,
+        children: [
+            {
+                path: '',
+                loadChildren: './borrowing/borrowing.module#BorrowingModule'
+            },
+        ]
     },
     {
         path: '**',
