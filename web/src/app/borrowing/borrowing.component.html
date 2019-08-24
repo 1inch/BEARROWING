@@ -9,22 +9,9 @@
                     <fa-icon (click)="clearFilter()" *ngIf="filter.length" [icon]="timesCircleIcon"
                              class="clear-filter"></fa-icon>
                 </h5>
-                <a (click)="setFilter('compound')" [ngClass]="inFilter('compound') ? 'active' : ''"
+                <a *ngFor="let pool of pools" (click)="toggleFilter(pool.id)" [ngClass]="inFilter(pool.id) ? 'active' : ''"
                    class="nav-link border-bottom" href="#">
-                    <img src="assets/compound-v2.svg" width="32"> Compound
-                </a>
-                <a (click)="setFilter('fulcrum')" [ngClass]="inFilter('fulcrum') ? 'active' : ''"
-                   class="nav-link border-bottom" href="#">
-                    <img src="assets/fulcrum.png" width="32"> Fulcrum
-                </a>
-                <a (click)="setFilter('nuo')" [ngClass]="inFilter('nuo') ? 'active' : ''"
-                   class="nav-link border-bottom"
-                   href="#">
-                    <img src="assets/nuo.png" width="32"> Nuo
-                </a>
-                <a (click)="setFilter('aave')" [ngClass]="inFilter('aave') ? 'active' : ''"
-                   class="nav-link border-bottom" href="#">
-                    <img src="assets/aave-logo-color.svg" width="32"> Aave DLP
+                    <img [src]="'assets/' + pool.icon" width="32"> {{pool.name}}
                 </a>
             </nav>
 
@@ -33,12 +20,12 @@
 
             <div class="row">
 
-                <div class="col-12 col-md-6 mb-3 mt-md-0">
+                <div class="col-12 col-md-6 mb-3 mt-md-0" *ngFor="let pool of resultPools">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title border-bottom pb-2 d-flex justify-content-between">
                                 <span>
-                                    <img src="assets/compound-v2.svg" width="32"> Compound
+                                    <img [src]="'assets/' + pool.icon" width="32"> {{pool.name}}
                                     <span class="text-success">
                                         136%
                                     </span>
@@ -108,36 +95,6 @@
                                 </div>
 
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 mb-3 mt-md-0">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title border-bottom pb-2 d-flex justify-content-between">
-                                <span>
-                                    <img src="assets/nuo.png" width="32"> Nuo
-                                </span>
-                                <span class="badge badge-pill badge-danger position-absolute" style="right: 20px;">Unhealthy</span>
-                            </h5>
-                            <p class="card-text">
-                                100 DAI
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 mb-3 mt-md-0">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title border-bottom pb-2 d-flex justify-content-between">
-                                <span>
-                                    <img src="assets/fulcrum.png" width="32"> Fulcrum
-                                </span>
-                                <span class="badge badge-pill badge-warning position-absolute" style="right: 20px;">Danger</span>
-                            </h5>
-                            <p class="card-text">
-                                100 DAI
-                            </p>
                         </div>
                     </div>
                 </div>

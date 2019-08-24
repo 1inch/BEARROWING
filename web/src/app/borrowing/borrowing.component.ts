@@ -15,22 +15,63 @@ export class BorrowingComponent implements OnInit {
     plusCircleIcon = faPlusCircle;
     minusCircleIcon = faMinusCircle;
 
+    pools = [
+        {
+            id: 'aave',
+            name: 'Aave DLP',
+            icon: 'aave-logo-color.svg'
+        },
+        {
+            id: 'compound',
+            name: 'Compound',
+            icon: 'compound-v2.svg'
+        },
+        {
+            id: 'fulcrum',
+            name: 'Fulcrum',
+            icon: 'fulcrum.png'
+        },
+        {
+            id: 'nuo',
+            name: 'Nuo',
+            icon: 'nuo.png'
+        }
+    ];
 
+    resultPools = [];
 
     constructor() {
+
     }
 
     ngOnInit() {
+
+        this.setResultPools();
     }
 
-    setFilter(value) {
+    async setResultPools() {
 
-        this.filter.push(value);
+        this.resultPools = this.pools
+            .filter(pool => !this.filter.length || this.filter.filter(value => pool.id === value).length || false);
+    }
+
+    toggleFilter(value) {
+
+        if (this.filter.indexOf(value) === -1) {
+
+            this.filter.push(value);
+        } else {
+
+            this.filter = this.filter.filter(v => v !== value);
+        }
+
+        this.setResultPools();
     }
 
     clearFilter() {
 
         this.filter = [];
+        this.setResultPools();
     }
 
     inFilter(value) {
