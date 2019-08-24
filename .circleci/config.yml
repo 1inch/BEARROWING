@@ -1,12 +1,6 @@
 version: 2
 jobs:
-    build:
-        branches:
-            only:
-                - master
-                - release
-            ignore:
-                - gh-pages
+    web:
         docker:
             - image: circleci/node:10-browsers
         working_directory: ~/repo
@@ -17,10 +11,7 @@ jobs:
             - checkout
             - restore_cache:
                   keys:
-                      - dependencies-{{ checksum "package.json" }}-{{ checksum "web/package.json" }}
-            - run:
-                  name: Install build dependencies
-                  command: yarn install
+                      - dependencies-{{ checksum "web/package.json" }}
             - run:
                   name: Install web dependencies
                   command: cd web && yarn install --frozen-lockfile
@@ -28,7 +19,7 @@ jobs:
                   paths:
                       - node_modules
                       - web/node_modules
-                  key: dependencies-{{ checksum "package.json" }}-{{ checksum "web/package.json" }}
+                  key: web-dependencies-{{ checksum "web/package.json" }}
             #      - run:
             #          name: Run lint
             #          command: yarn run lint
@@ -76,12 +67,50 @@ jobs:
 
                         echo "Done!"
                       fi
+    #      - deploy:
+    #          name: Deploy Smart Contract
+    #          command: |
+    #            if [ $CIRCLE_BRANCH == release ]; then
+    #              yarn run sm:deploy:prod
+    #            fi
+    verify:
+        docker:
+            - image: circleci/node:10-browsers
+        working_directory: ~/repo
+        environment:
+            - SOURCE_BRANCH: master
+        steps:
+            - checkout
+            - restore_cache:
+                  keys:
+                      - verify-dependencies-{{ checksum "package.json" }}
+            - run:
+                  name: Install build dependencies
+                  command: yarn install --frozen-lockfile
+            - save_cache:
+                  paths:
+                      - node_modules
+                  key: verify-dependencies-{{ checksum "package.json" }}
             - run:
                   name: MyTHX test
                   command: yarn run verify
-#      - deploy:
-#          name: Deploy Smart Contract
-#          command: |
-#            if [ $CIRCLE_BRANCH == release ]; then
-#              yarn run sm:deploy:prod
-#            fi
+workflows:
+    version: 2
+    build:
+        jobs:
+            - web:
+                  filters:
+                      branches:
+                          only:
+                              - master
+                              - release
+                          ignore:
+                              - gh-pages
+            - verify:
+                  filters:
+                      branches:
+                          only:
+                              - master
+                              - release
+                          ignore:
+                              - gh-pages
