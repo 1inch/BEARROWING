@@ -1,12 +1,6 @@
 version: 2
 jobs:
     web:
-        branches:
-            only:
-                - master
-                - release
-            ignore:
-                - gh-pages
         docker:
             - image: circleci/node:10-browsers
         working_directory: ~/repo
@@ -80,35 +74,43 @@ jobs:
     #              yarn run sm:deploy:prod
     #            fi
     verify:
-        branches:
-            only:
-                - master
-                - release
-            ignore:
-                - gh-pages
-            docker:
-                - image: circleci/node:10-browsers
-            working_directory: ~/repo
-            environment:
-                - SOURCE_BRANCH: master
-            steps:
-                - checkout
-                - restore_cache:
-                      keys:
-                          - verify-dependencies-{{ checksum "package.json" }}
-                - run:
-                      name: Install build dependencies
-                      command: yarn install
-                - save_cache:
-                      paths:
-                          - node_modules
-                      key: verify-dependencies-{{ checksum "package.json" }}
-                - run:
-                      name: MyTHX test
-                      command: yarn run verify
+        docker:
+            - image: circleci/node:10-browsers
+        working_directory: ~/repo
+        environment:
+            - SOURCE_BRANCH: master
+        steps:
+            - checkout
+            - restore_cache:
+                  keys:
+                      - verify-dependencies-{{ checksum "package.json" }}
+            - run:
+                  name: Install build dependencies
+                  command: yarn install
+            - save_cache:
+                  paths:
+                      - node_modules
+                  key: verify-dependencies-{{ checksum "package.json" }}
+            - run:
+                  name: MyTHX test
+                  command: yarn run verify
 workflows:
     version: 2
     build:
         jobs:
-            - web
-            - verify
+            - web:
+                  filters:
+                      branches:
+                          only:
+                              - master
+                              - release
+                          ignore:
+                              - gh-pages
+            - verify:
+                  filters:
+                      branches:
+                          only:
+                              - master
+                              - release
+                          ignore:
+                              - gh-pages
