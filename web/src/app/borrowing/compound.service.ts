@@ -89,7 +89,7 @@ export class CompoundService {
 
                 const balanceBN = ethers.utils.bigNumberify(balance);
 
-                const token = this.tokenService.tokens[allTokens[i].symbol.substr(1)];
+                const token = Object.assign({}, this.tokenService.tokens[allTokens[i].symbol.substr(1)]);
 
                 if (balanceBN.gt(0)) {
 
@@ -99,7 +99,50 @@ export class CompoundService {
                             // @ts-ignore
                             balanceBN
                         ),
-                        6);
+                        6
+                    );
+                } else {
+
+                    token['balance'] = '0';
+                }
+
+                token['rawBalance'] = balance;
+
+                return token;
+            });
+    }
+
+    async getBorrowedBalances(walletAddress) {
+
+        const allTokens = Object.values(this.tokens);
+
+        const promises = allTokens
+            .map(token => {
+
+                const contract = new this.web3Service.provider.eth.Contract(
+                    CERC20ABI,
+                    token.address
+                );
+
+                return contract.methods.borrowBalanceCurrent(walletAddress).call();
+            });
+
+        return (await Promise.all(promises))
+            .map((balance, i) => {
+
+                const balanceBN = ethers.utils.bigNumberify(balance);
+
+                const token = Object.assign({}, this.tokenService.tokens[allTokens[i].symbol.substr(1)]);
+
+                if (balanceBN.gt(0)) {
+
+                    token['balance'] = this.tokenService.toFixed(
+                        this.tokenService.formatAsset(
+                            token.symbol,
+                            // @ts-ignore
+                            balanceBN
+                        ),
+                        2);
                 } else {
 
                     token['balance'] = 0;
