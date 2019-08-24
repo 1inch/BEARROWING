@@ -50,6 +50,7 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
         LoanHolder holder = new LoanHolder();
 
         // Extract loan
+        borrowedUnderlyingToken.universalApprove(borrowedToken, borrowedAmount);
         borrowedToken.repayBorrowBehalf(msgSender, borrowedAmount);
         collateralToken.universalTransferFrom(msgSender, address(holder), collateralAmount);
 
