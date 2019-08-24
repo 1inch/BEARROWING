@@ -9,13 +9,15 @@ import "./ILoanPool.sol";
 import "./ICERC20.sol";
 import "./LoanHolder.sol";
 import "./UniversalERC20.sol";
+import "./GasDiscounter.sol";
 
 contract CompoundTokenization is
     ERC721,
     ERC721Enumerable,
     ERC721Metadata("Compound Position Token", "cPosition"),
     ILoanPoolLoaner,
-    ITokenizer
+    ITokenizer,
+    GasDiscounter
 {
 
     using UniversalERC20 for IERC20;
@@ -117,6 +119,7 @@ contract CompoundTokenization is
         uint256 amount
     )
         external
+        gasDiscount
         onlyTokenOwner(tokenId)
         payable
     {
@@ -150,6 +153,7 @@ contract CompoundTokenization is
         uint256 amount
     )
         external
+        gasDiscount
         onlyTokenOwner(tokenId)
     {
         LoanHolder holder = LoanHolder(address(tokenId));
@@ -177,6 +181,7 @@ contract CompoundTokenization is
         uint256 amount
     )
         external
+        gasDiscount
         onlyTokenOwner(tokenId)
     {
         require(ownerOf(tokenId) == msg.sender, "Wrong tokenId");
@@ -205,6 +210,7 @@ contract CompoundTokenization is
         uint256 amount
     )
         public
+        gasDiscount
         onlyTokenOwner(tokenId)
         payable
     {
