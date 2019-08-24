@@ -166,4 +166,9 @@ export class BorrowingComponent implements OnInit {
 
         return this.filter.indexOf(value) !== -1;
     }
+
+    async lend(pool) {
+
+        console.log('pool', pool);
+    }
 }

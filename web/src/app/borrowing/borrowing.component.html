@@ -9,7 +9,8 @@
                     <fa-icon (click)="clearFilter()" *ngIf="filter.length" [icon]="timesCircleIcon"
                              class="clear-filter"></fa-icon>
                 </h5>
-                <a *ngFor="let pool of pools" (click)="toggleFilter(pool.id)" [ngClass]="inFilter(pool.id) ? 'active' : ''"
+                <a (click)="toggleFilter(pool.id)" *ngFor="let pool of pools"
+                   [ngClass]="inFilter(pool.id) ? 'active' : ''"
                    class="nav-link border-bottom" href="#">
                     <img [src]="'assets/' + pool.icon" width="32"> {{pool.name}}
                 </a>
@@ -23,17 +24,19 @@
                 <div *ngIf="!resultPools.length && loading" class="col-12 mb-3 mt-md-0 text-center">
                     <app-loading-spinner></app-loading-spinner>
                 </div>
-                <div *ngIf="!resultPools.length && !loading && !notConnected" class="col-12 mb-3 mt-md-0 text-center align-middle">
-                    <h2 style="font-weight: 300;" class="mt-5">No borrowing or lending position found.</h2>
+                <div *ngIf="!resultPools.length && !loading && !notConnected"
+                     class="col-12 mb-3 mt-md-0 text-center align-middle">
+                    <h2 class="mt-5" style="font-weight: 300;">No borrowing or lending position found.</h2>
                 </div>
                 <div *ngIf="notConnected" class="col-12 mb-3 mt-md-0 text-center align-middle">
-                    <h2 style="font-weight: 300;" class="mt-5">Your wallet is not connected.</h2>
+                    <h2 class="mt-5" style="font-weight: 300;">Your wallet is not connected.</h2>
                     <button (click)="connect()"
                             *ngIf="web3Service.txProvider === null"
                             class="btn btn-warning btn-lg mt-3 mb-4"
                             style="font-weight: bold;" type="button">
-                        <svg class="connect-icon" height="24px" width="24px" style="fill: currentColor;enable-background:new 0 0 47 47;"
-                             version="1.1" viewBox="0 0 47 47"
+                        <svg class="connect-icon" height="24px" style="fill: currentColor;enable-background:new 0 0 47 47;"
+                             version="1.1"
+                             viewBox="0 0 47 47" width="24px"
                              x="0px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
                              y="0px">
     <g>
@@ -61,7 +64,7 @@
                         CONNECT
                     </button>
                 </div>
-                <div class="col-12 col-md-6 mb-3 mt-md-0" *ngFor="let pool of resultPools">
+                <div *ngFor="let pool of resultPools" class="col-12 col-md-6 mb-3 mt-md-0">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title border-bottom pb-2 d-flex justify-content-between">
@@ -74,43 +77,56 @@
                                 <span class="badge badge-pill badge-success position-absolute" style="right: 20px;">Healthy</span>
                             </h5>
                             <div class="card-text row">
-
-                                <div class="col-6 text-center border-right">
-                                    <h5 class="d-flex justify-content-between"
-                                        *ngFor="let token of pool.tokensWithBalance">
-                                        <span>
-                                            {{token.balance}}
-                                            <img [src]="'assets/tokens/' + token.address.toLowerCase() + '.png'" width="22">
-                                            {{token.symbol}}
-                                        </span>
-                                        <span style="white-space: nowrap;">
-                                            <a href="#" class="badge badge-success">
-                                                <fa-icon [icon]="plusCircleIcon"></fa-icon>
-                                            </a>
-                                            <a href="#" class="badge badge-danger ml-1">
-                                                <fa-icon [icon]="minusCircleIcon"></fa-icon>
-                                            </a>
-                                        </span>
-                                    </h5>
+                                <div class="col-12 col-md-6 text-center border-right">
+                                    <h5 class="border-bottom pb-2" style="font-weight: 300;">Lending</h5>
+                                    <table class="table">
+                                        <tr *ngFor="let token of pool.tokensWithBalance">
+                                            <td class="border-top-0 text-left">
+                                                {{token.balance}}
+                                            </td>
+                                            <td class="border-top-0 text-left" style="white-space: nowrap;">
+                                                <img [ngClass]="'token-' + token.symbol.toLowerCase()" [src]="'assets/tokens/' + token.address.toLowerCase() + '.png'"
+                                                     width="22">&nbsp;
+                                                {{token.symbol}}
+                                            </td>
+                                            <td class="border-top-0 text-right">
+                                                <span style="white-space: nowrap;">
+                                                    <a class="badge badge-success" href="#">
+                                                        <fa-icon [icon]="plusCircleIcon"></fa-icon>
+                                                    </a>
+                                                    <a class="badge badge-danger ml-1" href="#">
+                                                        <fa-icon [icon]="minusCircleIcon"></fa-icon>
+                                                    </a>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </div>
 
-                                <div class="col-6 text-center">
-                                    <h5 class="d-flex justify-content-between"
-                                        *ngFor="let token of pool.tokensWithBorrowedBalance">
-                                        <span>
-                                            {{token.balance}}
-                                            <img [src]="'assets/tokens/' + token.address.toLowerCase() + '.png'" width="22">
-                                            {{token.symbol}}
-                                        </span>
-                                        <span style="white-space: nowrap;">
-                                            <a href="#" class="badge badge-success">
-                                                <fa-icon [icon]="plusCircleIcon"></fa-icon>
-                                            </a>
-                                            <a href="#" class="badge badge-danger ml-1">
-                                                <fa-icon [icon]="minusCircleIcon"></fa-icon>
-                                            </a>
-                                        </span>
-                                    </h5>
+                                <div class="col-12 col-md-6 text-center">
+                                    <h5 class="border-bottom pb-2" style="font-weight: 300;">Borrowing</h5>
+                                    <table class="table">
+                                        <tr *ngFor="let token of pool.tokensWithBorrowedBalance">
+                                            <td class="border-top-0 text-left">
+                                                {{token.balance}}
+                                            </td>
+                                            <td class="border-top-0 text-left">
+                                                <img [ngClass]="'token-' + token.symbol.toLowerCase()" [src]="'assets/tokens/' + token.address.toLowerCase() + '.png'"
+                                                     width="22">&nbsp;
+                                                {{token.symbol}}
+                                            </td>
+                                            <td class="border-top-0 text-right">
+                                                <span style="white-space: nowrap;">
+                                                    <a class="badge badge-success" href="#">
+                                                        <fa-icon [icon]="plusCircleIcon"></fa-icon>
+                                                    </a>
+                                                    <a class="badge badge-danger ml-1" href="#">
+                                                        <fa-icon [icon]="minusCircleIcon"></fa-icon>
+                                                    </a>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </div>
 
                             </div>
