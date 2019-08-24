@@ -106,11 +106,11 @@ workflows:
                               - release
                           ignore:
                               - gh-pages
-            - verify:
-                  filters:
-                      branches:
-                          only:
-                              - master
-                              - release
-                          ignore:
-                              - gh-pages
+#            - verify:
+#                  filters:
+#                      branches:
+#                          only:
+#                              - master
+#                              - release
+#                          ignore:
+#                              - gh-pages
