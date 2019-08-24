@@ -2,23 +2,14 @@ pragma solidity ^0.5.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Metadata.sol";
 import "./ITokenizer.sol";
 import "./ILoanPool.sol";
 import "./ICERC20.sol";
 import "./LoanHolder.sol";
 import "./UniversalERC20.sol";
-import "./GasDiscounter.sol";
 
-contract CompoundTokenization is
-    ERC721,
-    ERC721Enumerable,
-    ERC721Metadata("Compound Position Token", "cPosition"),
-    ILoanPoolLoaner,
-    ITokenizer,
-    GasDiscounter
-{
+contract CompoundTokenization is ERC721, ERC721Metadata("Compound Position Token", "cPosition"), ILoanPoolLoaner, ITokenizer {
 
     using UniversalERC20 for IERC20;
 
@@ -119,7 +110,6 @@ contract CompoundTokenization is
         uint256 amount
     )
         external
-        gasDiscount
         onlyTokenOwner(tokenId)
         payable
     {
@@ -153,7 +143,6 @@ contract CompoundTokenization is
         uint256 amount
     )
         external
-        gasDiscount
         onlyTokenOwner(tokenId)
     {
         LoanHolder holder = LoanHolder(address(tokenId));
@@ -181,7 +170,6 @@ contract CompoundTokenization is
         uint256 amount
     )
         external
-        gasDiscount
         onlyTokenOwner(tokenId)
     {
         require(ownerOf(tokenId) == msg.sender, "Wrong tokenId");
@@ -210,7 +198,6 @@ contract CompoundTokenization is
         uint256 amount
     )
         public
-        gasDiscount
         onlyTokenOwner(tokenId)
         payable
     {
@@ -234,9 +221,5 @@ contract CompoundTokenization is
             );
             require(success, "");
         }
-    }
-
-    function tokensOfOwner(address owner) external view returns (uint256[] memory) {
-        return _tokensOfOwner(owner);
     }
 }
