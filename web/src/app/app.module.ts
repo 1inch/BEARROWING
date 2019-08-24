@@ -1,4 +1,3 @@
-import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 
 import {AppRoutingModule} from './app-routing.module';
@@ -7,16 +6,31 @@ import {ServiceWorkerModule} from '@angular/service-worker';
 import {environment} from '../environments/environment';
 import {HttpClientModule} from '@angular/common/http';
 import {DeviceDetectorModule} from 'ngx-device-detector';
+import {LoadingSpinnerComponent} from './loading-spinner/loading-spinner.component';
+import {BaseComponent} from './base/base.component';
+import {LoadingSpinnerModule} from './loading-spinner/loading-spinner.module';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {FormsModule} from '@angular/forms';
+import {ModalModule} from 'ngx-bootstrap';
+import {NgbToastModule} from '@ng-bootstrap/ng-bootstrap';
+import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
 
 @NgModule({
     declarations: [
-        AppComponent
+        AppComponent,
+        BaseComponent,
+        LoadingSpinnerComponent
     ],
     imports: [
-        BrowserModule,
+        BrowserAnimationsModule,
         AppRoutingModule,
+        FormsModule,
         HttpClientModule,
+        FontAwesomeModule,
+        LoadingSpinnerModule,
+        ModalModule.forRoot(),
         DeviceDetectorModule.forRoot(),
+        NgbToastModule,
         ServiceWorkerModule.register('ngsw-worker.js', {enabled: environment.production})
     ],
     providers: [],

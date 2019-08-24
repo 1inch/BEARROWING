@@ -5,20 +5,16 @@
         "outDir": "./dist/out-tsc",
         "sourceMap": true,
         "declaration": false,
+        "module": "es2015",
         "resolveJsonModule": true,
-        "downlevelIteration": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "moduleResolution": "node",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
-        "allowSyntheticDefaultImports": true,
-        "esModuleInterop": true,
-        "skipLibCheck": true,
-        "module": "esnext",
-        "moduleResolution": "node",
         "importHelpers": true,
-        "target": "es2015",
-        "types": [
-            "node"
-        ],
+        "skipLibCheck": true,
+        "target": "es5",
         "typeRoots": [
             "node_modules/@types"
         ],

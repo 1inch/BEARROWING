@@ -7,10 +7,11 @@ import {ethers} from 'ethers';
 })
 export class ConfigurationService {
 
-    public AGGREGATED_TOKEN_SWAP_ENS = '1xProtocol.eth';
+    public AGGREGATED_TOKEN_SWAP_ENS = 'BEARROWING.eth';
     public INFURA_KEY = '6705b777fb0b453ca5d6e33b2da3b6a9';
 
     public GAS_PRICE_URL = 'https://gasprice.poa.network';
+    public CONTRACT_ADDRESS = '0x';
 
     public fastGasPrice;
     public standardGasPrice;
