@@ -18,7 +18,6 @@ jobs:
             - restore_cache:
                   keys:
                       - v2-dependencies-{{ checksum "package.json" }}-{{ checksum "web/package.json" }}
-                      - v2-dependencies-
             - run:
                   name: Install build dependencies
                   command: yarn install --frozen-lockfile
