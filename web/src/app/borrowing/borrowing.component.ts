@@ -1,5 +1,6 @@
 import {Component, OnInit, ViewEncapsulation} from '@angular/core';
 import {faTimesCircle} from '@fortawesome/free-regular-svg-icons';
+import {faMinusCircle, faPlusCircle} from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'app-borrowing',
@@ -11,6 +12,8 @@ export class BorrowingComponent implements OnInit {
 
     filter = [];
     timesCircleIcon = faTimesCircle;
+    plusCircleIcon = faPlusCircle;
+    minusCircleIcon = faMinusCircle;
 
     constructor() {
     }
