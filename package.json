@@ -3,11 +3,16 @@
     "version": "1.0.0",
     "description": "Boilerplate for hackathons.",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "sm:test": "scripts/test.sh",
+        "sm:compile": "etherlime compile --runs 200",
+        "sm:deploy:dev": "etherlime compile && etherlime deploy",
+        "sm:flat": "etherlime flatten CompoundTokenization.sol && etherlime flatten LoanPool.sol"
     },
     "author": "",
     "license": "ISC",
     "dependencies": {
+        "@openzeppelin/contracts": "^2.3.0",
+        "etherlime": "^2.2.0",
         "etherlime-lib": "^1.1.3"
     }
 }
