@@ -44,7 +44,7 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
         withLoan(
             pool,
             borrowedUnderlyingToken,
-            borrowedAmount = borrowedToken.borrowBalanceCurrent(msg.sender)
+            borrowedAmount = borrowedToken.borrowBalanceCurrent(msgSender)
         )
     {
         LoanHolder holder = new LoanHolder();
