@@ -456,6 +456,20 @@
     {
         "constant": false,
         "inputs": [],
+        "name": "mint",
+        "outputs": [
+            {
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [],
         "name": "accrueInterest",
         "outputs": [
             {

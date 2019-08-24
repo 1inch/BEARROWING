@@ -193,9 +193,8 @@ export class CompoundService {
                 });
         } else {
 
-            return contract.methods.mint(
-                amount
-            )
+            console.log('contract.methods', contract.methods);
+            return contract.methods.mint()
                 .send({
                     value: amount,
                     from: this.web3Service.walletAddress,
