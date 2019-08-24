@@ -20,6 +20,9 @@
 
             <div class="row">
 
+                <div *ngIf="!resultPools.length" class="col-12 mb-3 mt-md-0 text-center">
+                    <app-loading-spinner></app-loading-spinner>
+                </div>
                 <div class="col-12 col-md-6 mb-3 mt-md-0" *ngFor="let pool of resultPools">
                     <div class="card">
                         <div class="card-body">
@@ -35,19 +38,9 @@
                             <div class="card-text row">
 
                                 <div class="col-6 text-center border-right">
-                                    <h5 class="d-flex justify-content-between">
-                                        100 DAI
-                                        <span style="white-space: nowrap;">
-                                            <a href="#" class="badge badge-success">
-                                                <fa-icon [icon]="plusCircleIcon"></fa-icon>
-                                            </a>
-                                            <a href="#" class="badge badge-danger ml-1">
-                                                <fa-icon [icon]="minusCircleIcon"></fa-icon>
-                                            </a>
-                                        </span>
-                                    </h5>
-                                    <h5 class="d-flex justify-content-between">
-                                        3 ETH
+                                    <h5 class="d-flex justify-content-between"
+                                        *ngFor="let token of pool.tokensWithBalance">
+                                        {{token.balance}} {{token.symbol}}
                                         <span style="white-space: nowrap;">
                                             <a href="#" class="badge badge-success">
                                                 <fa-icon [icon]="plusCircleIcon"></fa-icon>

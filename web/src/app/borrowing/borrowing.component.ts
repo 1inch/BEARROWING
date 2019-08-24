@@ -1,6 +1,9 @@
 import {Component, OnInit, ViewEncapsulation} from '@angular/core';
 import {faTimesCircle} from '@fortawesome/free-regular-svg-icons';
 import {faMinusCircle, faPlusCircle} from '@fortawesome/free-solid-svg-icons';
+import {CompoundService} from './compound.service';
+import {Web3Service} from '../web3.service';
+import {ethers} from 'ethers';
 
 @Component({
     selector: 'app-borrowing',
@@ -39,12 +42,26 @@ export class BorrowingComponent implements OnInit {
     ];
 
     resultPools = [];
+    compoundBalances = [];
 
-    constructor() {
+    constructor(
+        protected web3Service: Web3Service,
+        protected compoundService: CompoundService
+    ) {
 
+        this.web3Service.connectEvent.subscribe(async () => {
+
+            this.compoundBalances = await this.compoundService.getBalances(
+                this.web3Service.walletAddress
+            );
+
+            console.log('compoundBalances', this.compoundBalances);
+
+            this.setResultPools();
+        });
     }
 
-    ngOnInit() {
+    async ngOnInit() {
 
         this.setResultPools();
     }
@@ -52,7 +69,27 @@ export class BorrowingComponent implements OnInit {
     async setResultPools() {
 
         this.resultPools = this.pools
-            .filter(pool => !this.filter.length || this.filter.filter(value => pool.id === value).length || false);
+            .filter(pool => !this.filter.length || this.filter.filter(value => pool.id === value).length || false)
+            .map(pool => {
+
+                const tokensWithBalance = this.compoundBalances
+                    .filter(token => ethers.utils.bigNumberify(token.rawBalance).gt(0));
+
+                if (
+                    pool.id === 'compound' &&
+                    tokensWithBalance.length
+                ) {
+
+                    pool['tokensWithBalance'] = tokensWithBalance;
+
+                    return pool;
+                }
+
+                return null;
+            })
+            .filter(pool => pool !== null);
+
+        console.log('this.resultPools', this.resultPools);
     }
 
     toggleFilter(value) {
