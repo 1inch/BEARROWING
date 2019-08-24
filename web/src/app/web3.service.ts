@@ -71,7 +71,8 @@ export class Web3Service {
 
         engine.addProvider(
             new WebsocketSubprovider({
-                rpcUrl: 'wss://mainnet.infura.io/ws/v3/' + this.configurationService.INFURA_KEY
+                rpcUrl: 'wss://ropsten.infura.io/ws/v3/' + this.configurationService.INFURA_KEY
+                // rpcUrl: 'wss://mainnet.infura.io/ws/v3/' + this.configurationService.INFURA_KEY
             })
         );
 
