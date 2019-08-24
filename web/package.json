@@ -1,6 +1,6 @@
 {
     "name": "web",
-    "version": "0.0.0",
+    "version": "1.0.0",
     "scripts": {
         "ng": "ng",
         "start": "ng serve",
@@ -70,5 +70,19 @@
         "ts-node": "~7.0.0",
         "tslint": "~5.15.0",
         "typescript": "~3.5.3"
+    },
+    "browser": {
+        "fs": false,
+        "path": false,
+        "os": false,
+        "scrypt": false,
+        "vm": false,
+        "crypto": false,
+        "stream": false,
+        "http": false,
+        "tls": false,
+        "zlib": false,
+        "https": false,
+        "net": false
     }
 }
