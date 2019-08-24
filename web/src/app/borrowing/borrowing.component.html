@@ -9,22 +9,10 @@
                     <fa-icon (click)="clearFilter()" *ngIf="filter.length" [icon]="timesCircleIcon"
                              class="clear-filter"></fa-icon>
                 </h5>
-                <a (click)="setFilter('compound')" [ngClass]="inFilter('compound') ? 'active' : ''"
+                <a (click)="toggleFilter(pool.id)" *ngFor="let pool of pools"
+                   [ngClass]="inFilter(pool.id) ? 'active' : ''"
                    class="nav-link border-bottom" href="#">
-                    <img src="assets/compound-v2.svg" width="32"> Compound
-                </a>
-                <a (click)="setFilter('fulcrum')" [ngClass]="inFilter('fulcrum') ? 'active' : ''"
-                   class="nav-link border-bottom" href="#">
-                    <img src="assets/fulcrum.png" width="32"> Fulcrum
-                </a>
-                <a (click)="setFilter('nuo')" [ngClass]="inFilter('nuo') ? 'active' : ''"
-                   class="nav-link border-bottom"
-                   href="#">
-                    <img src="assets/nuo.png" width="32"> Nuo
-                </a>
-                <a (click)="setFilter('aave')" [ngClass]="inFilter('aave') ? 'active' : ''"
-                   class="nav-link border-bottom" href="#">
-                    <img src="assets/aave-logo-color.svg" width="32"> Aave DLP
+                    <img [src]="'assets/' + pool.icon" width="32"> {{pool.name}}
                 </a>
             </nav>
 
@@ -33,12 +21,55 @@
 
             <div class="row">
 
-                <div class="col-12 col-md-6 mb-3 mt-md-0">
+                <div *ngIf="!resultPools.length && loading" class="col-12 mb-3 mt-md-0 text-center">
+                    <app-loading-spinner></app-loading-spinner>
+                </div>
+                <div *ngIf="!resultPools.length && !loading && !notConnected"
+                     class="col-12 mb-3 mt-md-0 text-center align-middle">
+                    <h2 class="mt-5" style="font-weight: 300;">No borrowing or lending position found.</h2>
+                </div>
+                <div *ngIf="notConnected" class="col-12 mb-3 mt-md-0 text-center align-middle">
+                    <h2 class="mt-5" style="font-weight: 300;">Your wallet is not connected.</h2>
+                    <button (click)="connect()"
+                            *ngIf="web3Service.txProvider === null"
+                            class="btn btn-warning btn-lg mt-3 mb-4"
+                            style="font-weight: bold;" type="button">
+                        <svg class="connect-icon" height="24px" style="fill: currentColor;enable-background:new 0 0 47 47;"
+                             version="1.1"
+                             viewBox="0 0 47 47" width="24px"
+                             x="0px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg"
+                             y="0px">
+    <g>
+        <g id="Layer_1_110_">
+            <g>
+                <path d="M17.567,15.938l-2.859-2.702c0.333-0.605,0.539-1.29,0.539-2.029c0-2.342-1.897-4.239-4.24-4.239
+                    c-2.343,0-4.243,1.896-4.243,4.239c0,2.343,1.9,4.241,4.243,4.241c0.826,0,1.59-0.246,2.242-0.654l2.855,2.699
+                    C16.536,16.922,17.023,16.399,17.567,15.938z"/>
+                <path d="M29.66,15.6l3.799-6.393c0.374,0.107,0.762,0.184,1.169,0.184c2.347,0,4.244-1.898,4.244-4.241
+                    c0-2.342-1.897-4.239-4.244-4.239c-2.343,0-4.239,1.896-4.239,4.239c0,1.163,0.469,2.214,1.227,2.981l-3.787,6.375
+                    C28.48,14.801,29.094,15.169,29.66,15.6z"/>
+                <path d="M42.762,20.952c-1.824,0-3.369,1.159-3.968,2.775l-5.278-0.521c0,0.04,0.006,0.078,0.006,0.117
+                    c0,0.688-0.076,1.36-0.213,2.009l5.276,0.521c0.319,2.024,2.062,3.576,4.177,3.576c2.342,0,4.238-1.896,4.238-4.238
+                    C47,22.85,45.104,20.952,42.762,20.952z"/>
+                <path d="M28.197,37.624l-1.18-5.156c-0.666,0.232-1.359,0.398-2.082,0.481l1.182,5.157c-1.355,0.709-2.29,2.11-2.29,3.746
+                    c0,2.342,1.896,4.237,4.243,4.237c2.342,0,4.238-1.896,4.238-4.237C32.311,39.553,30.479,37.692,28.197,37.624z"/>
+                <path d="M14.357,25.37l-6.57,2.201c-0.758-1.158-2.063-1.926-3.548-1.926C1.896,25.645,0,27.542,0,29.884
+                    c0,2.345,1.896,4.242,4.239,4.242c2.341,0,4.242-1.897,4.242-4.242c0-0.098-0.021-0.188-0.029-0.284l6.591-2.207
+                    C14.746,26.752,14.51,26.077,14.357,25.37z"/>
+                <circle cx="23.83" cy="23.323" r="7.271"/>
+            </g>
+        </g>
+    </g>
+    </svg>
+                        CONNECT
+                    </button>
+                </div>
+                <div *ngFor="let pool of resultPools" class="col-12 col-md-6 mb-3 mt-md-0">
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title border-bottom pb-2 d-flex justify-content-between">
                                 <span>
-                                    <img src="assets/compound-v2.svg" width="32"> Compound
+                                    <img [src]="'assets/' + pool.icon" width="32"> {{pool.name}}
                                     <span class="text-success">
                                         136%
                                     </span>
@@ -46,98 +77,59 @@
                                 <span class="badge badge-pill badge-success position-absolute" style="right: 20px;">Healthy</span>
                             </h5>
                             <div class="card-text row">
-
-                                <div class="col-6 text-center border-right">
-                                    <h5 class="d-flex justify-content-between">
-                                        100 DAI
-                                        <span style="white-space: nowrap;">
-                                            <a href="#" class="badge badge-success">
-                                                <fa-icon [icon]="plusCircleIcon"></fa-icon>
-                                            </a>
-                                            <a href="#" class="badge badge-danger ml-1">
-                                                <fa-icon [icon]="minusCircleIcon"></fa-icon>
-                                            </a>
-                                        </span>
-                                    </h5>
-                                    <h5 class="d-flex justify-content-between">
-                                        3 ETH
-                                        <span style="white-space: nowrap;">
-                                            <a href="#" class="badge badge-success">
-                                                <fa-icon [icon]="plusCircleIcon"></fa-icon>
-                                            </a>
-                                            <a href="#" class="badge badge-danger ml-1">
-                                                <fa-icon [icon]="minusCircleIcon"></fa-icon>
-                                            </a>
-                                        </span>
-                                    </h5>
+                                <div class="col-12 col-md-6 text-center border-right">
+                                    <h5 class="border-bottom pb-2" style="font-weight: 300;">Lending</h5>
+                                    <table class="table">
+                                        <tr *ngFor="let token of pool.tokensWithBalance">
+                                            <td class="border-top-0 text-left">
+                                                {{token.balance}}
+                                            </td>
+                                            <td class="border-top-0 text-left" style="white-space: nowrap;">
+                                                <img [ngClass]="'token-' + token.symbol.toLowerCase()" [src]="'assets/tokens/' + token.address.toLowerCase() + '.png'"
+                                                     width="22">&nbsp;
+                                                {{token.symbol}}
+                                            </td>
+                                            <td class="border-top-0 text-right">
+                                                <span style="white-space: nowrap;">
+                                                    <a class="badge badge-success" href="#">
+                                                        <fa-icon [icon]="plusCircleIcon"></fa-icon>
+                                                    </a>
+                                                    <a class="badge badge-danger ml-1" href="#">
+                                                        <fa-icon [icon]="minusCircleIcon"></fa-icon>
+                                                    </a>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </div>
 
-                                <div class="col-6 text-center">
-                                    <h5 class="d-flex justify-content-between">
-                                        <span>
-                                            45 BAT
-                                            <span class="text-success">
-                                                1.25%
-                                            </span>
-                                        </span>
-                                        <span style="white-space: nowrap;">
-                                            <a href="#" class="badge badge-success">
-                                                <fa-icon [icon]="plusCircleIcon"></fa-icon>
-                                            </a>
-                                            <a href="#" class="badge badge-danger ml-1">
-                                                <fa-icon [icon]="minusCircleIcon"></fa-icon>
-                                            </a>
-                                        </span>
-                                    </h5>
-                                    <h5 class="d-flex justify-content-between">
-                                        <span>
-                                            6 ZRX
-                                            <span class="text-success">
-                                                0.17%
-                                            </span>
-                                        </span>
-                                        <span style="white-space: nowrap;">
-                                            <a href="#" class="badge badge-success">
-                                                <fa-icon [icon]="plusCircleIcon"></fa-icon>
-                                            </a>
-                                            <a href="#" class="badge badge-danger ml-1">
-                                                <fa-icon [icon]="minusCircleIcon"></fa-icon>
-                                            </a>
-                                        </span>
-                                    </h5>
+                                <div class="col-12 col-md-6 text-center">
+                                    <h5 class="border-bottom pb-2" style="font-weight: 300;">Borrowing</h5>
+                                    <table class="table">
+                                        <tr *ngFor="let token of pool.tokensWithBorrowedBalance">
+                                            <td class="border-top-0 text-left">
+                                                {{token.balance}}
+                                            </td>
+                                            <td class="border-top-0 text-left">
+                                                <img [ngClass]="'token-' + token.symbol.toLowerCase()" [src]="'assets/tokens/' + token.address.toLowerCase() + '.png'"
+                                                     width="22">&nbsp;
+                                                {{token.symbol}}
+                                            </td>
+                                            <td class="border-top-0 text-right">
+                                                <span style="white-space: nowrap;">
+                                                    <a class="badge badge-success" href="#">
+                                                        <fa-icon [icon]="plusCircleIcon"></fa-icon>
+                                                    </a>
+                                                    <a class="badge badge-danger ml-1" href="#">
+                                                        <fa-icon [icon]="minusCircleIcon"></fa-icon>
+                                                    </a>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </div>
 
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 mb-3 mt-md-0">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title border-bottom pb-2 d-flex justify-content-between">
-                                <span>
-                                    <img src="assets/nuo.png" width="32"> Nuo
-                                </span>
-                                <span class="badge badge-pill badge-danger position-absolute" style="right: 20px;">Unhealthy</span>
-                            </h5>
-                            <p class="card-text">
-                                100 DAI
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-12 col-md-6 mb-3 mt-md-0">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title border-bottom pb-2 d-flex justify-content-between">
-                                <span>
-                                    <img src="assets/fulcrum.png" width="32"> Fulcrum
-                                </span>
-                                <span class="badge badge-pill badge-warning position-absolute" style="right: 20px;">Danger</span>
-                            </h5>
-                            <p class="card-text">
-                                100 DAI
-                            </p>
                         </div>
                     </div>
                 </div>
