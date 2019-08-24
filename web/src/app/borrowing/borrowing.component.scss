@@ -1,0 +1,35 @@
+.sidebar-nav {
+
+    h5 {
+
+    }
+
+    a {
+        color: #699612;
+    }
+
+    .nav-link {
+        min-height: 49px;
+        line-height: 49px;
+
+        &.active {
+            color: #fff;
+            background: #457012;
+        }
+
+        &:hover {
+            color: #fff;
+            background: #629e17;
+        }
+    }
+
+    .nav-link.border-bottom {
+        margin-right: 2px;
+        margin-left: 2px;
+        border-color: #2a2a2a !important;
+    }
+
+    .clear-filter {
+        cursor: pointer;
+    }
+}

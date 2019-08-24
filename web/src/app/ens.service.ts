@@ -16,11 +16,11 @@ export class EnsService {
 
     lookupAddress(address: string) {
 
-        return this.web3Service.provider.lookupAddress(address);
+        return this.web3Service.ethersProvider.lookupAddress(address);
     }
 
     resolveName(name: string) {
 
-        return this.web3Service.provider.resolveName(name);
+        return this.web3Service.ethersProvider.resolveName(name);
     }
 }

@@ -7,6 +7,7 @@ import {ConfigurationService} from '../configuration.service';
 import {ThemeService} from '../theme.service';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap';
 import {ConnectService} from '../connect.service';
+import {faCopy} from '@fortawesome/free-solid-svg-icons';
 
 declare let ethereum: any;
 declare let web3: any;
@@ -28,6 +29,7 @@ export class BaseComponent implements OnInit {
     referralUrl = '';
     isMetaMask = false;
     isTrustWallet = false;
+    copyIcon = faCopy;
 
     @ViewChild('walletIconEl', {static: false})
     walletIconEl: ElementRef;

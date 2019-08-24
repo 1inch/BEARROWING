@@ -15,6 +15,7 @@ import createLedgerSubprovider from '@ledgerhq/web3-subprovider';
 import Web3 from 'web3';
 import {Subject} from 'rxjs';
 import {Bitski} from 'bitski';
+import {ethers} from 'ethers';
 
 declare let require: any;
 declare let web3: any;
@@ -27,6 +28,7 @@ declare let window: any;
 export class Web3Service {
 
     public provider;
+    public ethersProvider;
 
     public txProvider = null;
     public txProviderName;
@@ -51,6 +53,14 @@ export class Web3Service {
     }
 
     async initWeb3() {
+
+        const oneInch = new ethers.providers.JsonRpcProvider(this.rpcUrl);
+        const infura = new ethers.providers.InfuraProvider('homestead', this.configurationService.INFURA_KEY);
+
+        this.ethersProvider = new ethers.providers.FallbackProvider([
+            oneInch,
+            infura,
+        ]);
 
         const engine = new ProviderEngine();
         // engine.addProvider(
@@ -167,11 +177,11 @@ export class Web3Service {
 
         try {
 
-            this.walletEns = await this.provider.lookupAddress(this.walletAddress);
+            this.walletEns = await this.ethersProvider.lookupAddress(this.walletAddress);
 
         } catch (e) {
 
-            // console.error(e);
+            console.error(e);
         }
 
         this.connectEvent.next({

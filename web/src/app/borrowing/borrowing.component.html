@@ -1,1 +1,62 @@
-<p>borrowing works!</p>
+<div class="container-fluid mt-4 mt-md-5">
+    <div class="row">
+
+        <div class="col-3 sidebar-nav">
+
+            <nav class="nav flex-column">
+                <h5 class="border-bottom p-3 mb-0 d-flex justify-content-between">
+                    Filter
+                    <fa-icon (click)="clearFilter()" *ngIf="filter.length" [icon]="timesCircleIcon"
+                             class="clear-filter"></fa-icon>
+                </h5>
+                <a (click)="setFilter('compound')" [ngClass]="inFilter('compound') ? 'active' : ''"
+                   class="nav-link border-bottom" href="#">
+                    <img src="assets/compound-v2.svg" width="32"> Compound
+                </a>
+                <a (click)="setFilter('fulcrum')" [ngClass]="inFilter('fulcrum') ? 'active' : ''"
+                   class="nav-link border-bottom" href="#">
+                    <img src="assets/fulcrum.png" width="32"> Fulcrum
+                </a>
+                <a (click)="setFilter('nuo')" [ngClass]="inFilter('nuo') ? 'active' : ''"
+                   class="nav-link border-bottom"
+                   href="#">
+                    <img src="assets/nuo.png" width="32"> Nuo
+                </a>
+                <a (click)="setFilter('aave')" [ngClass]="inFilter('aave') ? 'active' : ''"
+                   class="nav-link border-bottom" href="#">
+                    <img src="assets/aave-logo-color.svg" width="32"> Aave DLP
+                </a>
+            </nav>
+
+        </div>
+        <div class="col-9">
+
+            <div class="row">
+
+                <div class="col-12 col-md-6 mb-3 mt-md-0">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Compound</h5>
+                            <p class="card-text">
+                                100 DAI
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 mb-3 mt-md-0">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Compound</h5>
+                            <p class="card-text">
+                                100 DAI
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+</div>
