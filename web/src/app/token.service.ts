@@ -1415,12 +1415,11 @@ export class TokenService {
 
     async getTokenBalance(symbol: string, address: string) {
 
-        const contract = new ethers.Contract(
-            this.tokens[symbol].address,
+        const contract = new this.web3Service.provider.eth.Contract(
             ERC20ABI,
-            this.web3Service.provider
+            this.tokens[symbol].address
         );
 
-        return await contract.balanceOf(address);
+        return ethers.utils.bigNumberify(await contract.methods.balanceOf(address).call());
     }
 }

@@ -2,6 +2,8 @@ import {Injectable} from '@angular/core';
 import {Web3Service} from '../web3.service';
 import {TokenService} from '../token.service';
 import {ethers} from 'ethers';
+import {BigNumber} from 'ethers/utils';
+import {ConfigurationService} from '../configuration.service';
 
 const CERC20ABI = require('../abi/CERC20.json');
 
@@ -64,7 +66,8 @@ export class CompoundService {
 
     constructor(
         protected web3Service: Web3Service,
-        protected tokenService: TokenService
+        protected tokenService: TokenService,
+        protected configurationService: ConfigurationService
     ) {
 
     }
@@ -152,5 +155,52 @@ export class CompoundService {
 
                 return token;
             });
+    }
+
+    async lend(tokenSymbol: string, amount: BigNumber) {
+
+        tokenSymbol = 'c' + tokenSymbol;
+
+        const contract = new this.web3Service.txProvider.eth.Contract(
+            CERC20ABI,
+            this.tokenService.tokens[tokenSymbol].address
+        );
+
+        if (tokenSymbol !== 'cETH') {
+
+            if (
+                (await contract.methods.allowance(
+                    this.web3Service.walletAddress,
+                    this.tokenService.tokens[tokenSymbol].address
+                ).call()).eq(0)
+            ) {
+
+                await contract.methods.approve(
+                    this.tokenService.tokens[tokenSymbol].address,
+                    ethers.utils.bigNumberify(2).pow(255)
+                ).send({
+                    from: this.web3Service.walletAddress,
+                    gasPrice: this.configurationService.fastGasPrice
+                });
+            }
+
+            return contract.methods.mint(
+                amount
+            )
+                .send({
+                    from: this.web3Service.walletAddress,
+                    gasPrice: this.configurationService.fastGasPrice
+                });
+        } else {
+
+            return contract.methods.mint(
+                amount
+            )
+                .send({
+                    value: amount,
+                    from: this.web3Service.walletAddress,
+                    gasPrice: this.configurationService.fastGasPrice
+                });
+        }
     }
 }

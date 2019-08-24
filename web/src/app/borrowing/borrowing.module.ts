@@ -5,15 +5,18 @@ import {BorrowingRoutingModule} from './borrowing-routing.module';
 import {BorrowingComponent} from './borrowing.component';
 import {FontAwesomeModule} from '@fortawesome/angular-fontawesome';
 import {LoadingSpinnerModule} from '../loading-spinner/loading-spinner.module';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 
 @NgModule({
     declarations: [BorrowingComponent],
     imports: [
         CommonModule,
+        FormsModule,
         BorrowingRoutingModule,
         FontAwesomeModule,
-        LoadingSpinnerModule
+        LoadingSpinnerModule,
+        ReactiveFormsModule
     ]
 })
 export class BorrowingModule {

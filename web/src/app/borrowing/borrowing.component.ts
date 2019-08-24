@@ -1,10 +1,14 @@
-import {Component, OnInit, ViewEncapsulation} from '@angular/core';
+import {Component, OnInit, TemplateRef, ViewChild, ViewEncapsulation} from '@angular/core';
 import {faTimesCircle} from '@fortawesome/free-regular-svg-icons';
 import {faMinusCircle, faPlusCircle} from '@fortawesome/free-solid-svg-icons';
 import {CompoundService} from './compound.service';
 import {Web3Service} from '../web3.service';
 import {ethers} from 'ethers';
 import {ConnectService} from '../connect.service';
+import {TokenService} from '../token.service';
+import {BsModalRef, BsModalService} from 'ngx-bootstrap';
+import {FormControl} from '@angular/forms';
+import {debounceTime, distinctUntilChanged, filter} from 'rxjs/operators';
 
 @Component({
     selector: 'app-borrowing',
@@ -20,6 +24,11 @@ export class BorrowingComponent implements OnInit {
     minusCircleIcon = faMinusCircle;
     loading = true;
     notConnected = false;
+
+    lendTemplateModalRef: BsModalRef;
+
+    @ViewChild('lendTemplate', {static: false})
+    lendTemplate: TemplateRef<any>;
 
     pools = [
         {
@@ -47,19 +56,27 @@ export class BorrowingComponent implements OnInit {
     resultPools = [];
     compoundBalances = [];
     compoundBorrowedBalances = [];
+    selectedPool;
+    selectedToken;
+    fromTokenAmountControl = new FormControl('');
+    fromTokenAmount;
+    fromTokenBalance = '0';
+    fromTokenBalanceBN = ethers.utils.bigNumberify(0);
+    fromToken;
+    modalLoading = false;
 
     constructor(
         protected web3Service: Web3Service,
         protected compoundService: CompoundService,
-        protected connectService: ConnectService
+        protected connectService: ConnectService,
+        protected tokenService: TokenService,
+        private modalService: BsModalService
     ) {
 
         this.web3Service.connectEvent.subscribe(async () => {
 
             this.notConnected = false;
             this.loading = true;
-
-            console.log('this.web3Service.walletAddress', this.web3Service.walletAddress);
 
             const [compoundBalances, compoundBorrowedBalances] = await Promise.all([
                 this.compoundService.getBalances(
@@ -95,6 +112,65 @@ export class BorrowingComponent implements OnInit {
     async ngOnInit() {
 
         this.setResultPools();
+
+        this.fromTokenAmountControl.valueChanges.pipe(
+            debounceTime(200),
+            filter((value, index) => this.isNumeric(value) && value !== 0 && !value.match(/^([0\.]+)$/)),
+            distinctUntilChanged(),
+        )
+            .subscribe((value) => {
+
+                this.fromTokenAmount = value;
+                localStorage.setItem('fromTokenAmount', this.fromTokenAmount);
+            });
+
+        if (localStorage.getItem('fromTokenAmount')) {
+
+            this.fromTokenAmountControl.setValue(localStorage.getItem('fromTokenAmount'));
+        } else {
+
+            this.fromTokenAmountControl.setValue('1.0');
+        }
+    }
+
+    async loadTokenBalance() {
+
+        if (
+            this.web3Service.walletAddress
+        ) {
+
+            if (this.fromToken === 'ETH') {
+
+                this.fromTokenBalanceBN = (await this.web3Service.provider.eth.getBalance(this.web3Service.walletAddress))
+                    .mul(95)
+                    .div(100);
+
+                this.fromTokenBalance = ethers.utils.formatEther(
+                    this.fromTokenBalanceBN
+                );
+
+            } else {
+
+                this.fromTokenBalanceBN = await this.tokenService.getTokenBalance(
+                    this.fromToken,
+                    await this.web3Service.walletAddress
+                );
+
+                this.fromTokenBalance = this.tokenService.formatAsset(
+                    this.fromToken,
+                    // @ts-ignore
+                    this.fromTokenBalanceBN
+                );
+            }
+
+            this.fromTokenBalance = this.tokenService.toFixed(this.fromTokenBalance, 18);
+
+            if (this.fromTokenBalance === '0') {
+
+                this.fromTokenBalance = '0.0';
+                this.fromTokenBalanceBN = ethers.utils.bigNumberify(0);
+            }
+        }
     }
 
     async connect() {
@@ -139,8 +215,6 @@ export class BorrowingComponent implements OnInit {
                 return pool;
             })
             .filter(pool => pool['tokensWithBalance'] !== null || pool['tokensWithBorrowedBalance'] !== null);
-
-        console.log('this.resultPools', this.resultPools);
     }
 
     toggleFilter(value) {
@@ -167,8 +241,56 @@ export class BorrowingComponent implements OnInit {
         return this.filter.indexOf(value) !== -1;
     }
 
-    async lend(pool) {
+    async openLendModal(pool, token) {
 
-        console.log('pool', pool);
+        this.selectedPool = pool;
+        this.selectedToken = token;
+
+        this.fromToken = token.symbol;
+
+        this.loadTokenBalance();
+
+        this.lendTemplateModalRef = this.modalService.show(this.lendTemplate);
+    }
+
+    isNumeric(str) {
+        return /^\d*\.{0,1}\d*$/.test(str);
+    }
+
+    async lend() {
+
+        this.modalLoading = true;
+
+        try {
+
+            if (this.selectedPool.id === 'compound') {
+
+                await this.compoundService.lend(
+                    this.selectedToken.symbol,
+                    this.tokenService.parseAsset(
+                        this.selectedToken.symbol,
+                        this.fromTokenAmount
+                    )
+                );
+            } else {
+
+                alert('Not supported yet...');
+            }
+
+        } catch (e) {
+
+            console.error(e);
+        }
+
+        this.modalLoading = false;
+    }
+
+    async withdraw(pool, token) {
+
+    }
+
+    async setFromTokenAmount() {
+
+        this.fromTokenAmountControl.setValue(this.fromTokenBalance);
     }
 }
