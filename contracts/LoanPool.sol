@@ -55,12 +55,12 @@ contract LoanPool is ERC20, ERC20Detailed, ILoanPool {
     )
         external
     {
-        uint256 expectedReturn = tkn.universalBalanceOf(address(this))
+        uint256 expectedBalance = tkn.universalBalanceOf(address(this))
             .add(amount.mul(1e14).div(1e18));
         tkn.universalTransfer(address(loaner), amount);
 
-        loaner.inLoan(expectedReturn, data);
+        loaner.inLoan(amount.add(amount.mul(1e14).div(1e18)), data);
 
-        require(tkn.universalBalanceOf(address(this)) >= expectedReturn, "Forgot to repay");
+        require(tkn.universalBalanceOf(address(this)) >= expectedBalance, "Forgot to repay");
     }
 }
