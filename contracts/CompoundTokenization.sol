@@ -3,24 +3,9 @@ pragma solidity ^0.5.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "./ILoanPool.sol";
+import "./ICERC20.sol";
 import "./LoanHolder.sol";
 import "./UniversalERC20.sol";
-
-interface ICompoundController {
-    function enterMarkets(address[] calldata cTokens) external returns(uint[] memory);
-}
-
-interface ICERC20 {
-    function borrowBalanceStored(address account) external view returns(uint256);
-    function borrowBalanceCurrent(address account) external returns(uint256);
-
-    function mint() external payable;
-    function mint(uint256 amount) external returns(uint256);
-    function redeem(uint256 amount) external returns(uint256);
-    function borrow(uint256 amount) external returns(uint256);
-    function repayBorrowBehalf(address borrower) external payable returns (uint256);
-    function repayBorrowBehalf(address borrower, uint repayAmount) external returns (uint256);
-}
 
 contract CompoundTokenization is ERC721, ILoanPoolLoaner {
 
@@ -31,37 +16,18 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
         _;
     }
 
-    function migrate(
-        ILoanPool pool,
-        IERC20 collateralToken,
-        uint256 collateralAmount,
-        ICERC20 borrowedToken,
-        IERC20 borrowedUnderlyingToken,
-        uint256 borrowedAmount,
-        address msgSender
+    function _enterMarket(
+        LoanHolder holder,
+        ICompoundController controller,
+        address cToken
     )
-        public
-        withLoan(
-            pool,
-            borrowedUnderlyingToken,
-            borrowedAmount = borrowedToken.borrowBalanceCurrent(msgSender)
-        )
+        internal
+        returns(LoanHolder)
     {
-        LoanHolder holder = new LoanHolder();
-
-        // Extract loan
-        borrowedUnderlyingToken.universalApprove(borrowedToken, borrowedAmount);
-        borrowedToken.repayBorrowBehalf(msgSender, borrowedAmount);
-        collateralToken.universalTransferFrom(msgSender, address(holder), collateralAmount);
-
-        // Create new loan
-        holder.perform(address(borrowedToken), 0, abi.encodeWithSelector(
-            borrowedToken.borrow.selector,
-            _getExpectedReturn()
+        holder.perform(address(controller), 0, abi.encodeWithSelector(
+            controller.enterMarkets.selector,
+            [cToken]
         ));
-
-        // Transfer loan
-        _mint(msgSender, uint256(address(holder)));
     }
 
     function enterMarkets(
@@ -81,6 +47,52 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
         ));
     }
 
+    function migrate(
+        ILoanPool pool,
+        IERC20 collateralToken,
+        uint256 collateralAmount,
+        ICERC20 borrowedToken,
+        IERC20 borrowedUnderlyingToken,
+        uint256 borrowedAmount,
+        address msgSender
+    )
+        public
+        withLoan(
+            pool,
+            borrowedUnderlyingToken,
+            borrowedAmount = borrowedToken.borrowBalanceCurrent(msgSender)
+        )
+    {
+        LoanHolder holder = new LoanHolder();
+        _enterMarket(holder, borrowedToken.comptroller(), address(collateralToken));
+        _enterMarket(holder, borrowedToken.comptroller(), address(borrowedToken));
+
+        // Extract loan
+        borrowedUnderlyingToken.universalApprove(address(borrowedToken), borrowedAmount);
+        borrowedToken.repayBorrowBehalf(msgSender, borrowedAmount);
+        collateralToken.universalTransferFrom(msgSender, address(holder), collateralAmount);
+
+        // Create new loan
+        holder.perform(address(borrowedToken), 0, abi.encodeWithSelector(
+            borrowedToken.borrow.selector,
+            _getExpectedReturn()
+        ));
+
+        // Return loan
+        if (borrowedToken == ICERC20(0)) {
+            holder.perform(address(msgSender), _getExpectedReturn(), "");
+        } else {
+            holder.perform(address(borrowedUnderlyingToken), 0, abi.encodeWithSelector(
+                borrowedUnderlyingToken.transfer.selector,
+                address(pool),
+                _getExpectedReturn()
+            ));
+        }
+
+        // Transfer position
+        _mint(msgSender, uint256(address(holder)));
+    }
+
     function mint(
         uint256 tokenId,
         ICERC20 cToken,
@@ -94,6 +106,7 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
         LoanHolder holder = LoanHolder(address(tokenId));
         if (tokenId == 0) {
             holder = new LoanHolder();
+            _enterMarket(holder, cToken.comptroller(), address(cToken));
             _mint(msg.sender, uint256(address(holder)));
         }
 
