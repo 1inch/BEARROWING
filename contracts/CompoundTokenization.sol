@@ -19,14 +19,18 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
     function _enterMarket(
         LoanHolder holder,
         ICompoundController controller,
-        address cToken
+        address cToken1,
+        address cToken2
     )
         internal
         returns(LoanHolder)
     {
         holder.perform(address(controller), 0, abi.encodeWithSelector(
             controller.enterMarkets.selector,
-            [cToken]
+            uint256(0x20), // offset
+            uint256(2),    // length
+            cToken1,
+            cToken2
         ));
     }
 
@@ -64,8 +68,7 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
         )
     {
         LoanHolder holder = new LoanHolder();
-        _enterMarket(holder, borrowedToken.comptroller(), address(collateralToken));
-        _enterMarket(holder, borrowedToken.comptroller(), address(borrowedToken));
+        _enterMarket(holder, borrowedToken.comptroller(), address(collateralToken), address(borrowedToken));
 
         // Extract loan
         borrowedUnderlyingToken.universalApprove(address(borrowedToken), borrowedAmount);
@@ -106,7 +109,7 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
         LoanHolder holder = LoanHolder(address(tokenId));
         if (tokenId == 0) {
             holder = new LoanHolder();
-            _enterMarket(holder, cToken.comptroller(), address(cToken));
+            _enterMarket(holder, cToken.comptroller(), address(cToken), address(0));
             _mint(msg.sender, uint256(address(holder)));
         }
 
