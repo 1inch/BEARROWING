@@ -13,6 +13,7 @@
     "dependencies": {
         "@openzeppelin/contracts": "^2.3.0",
         "etherlime": "^2.2.0",
-        "etherlime-lib": "^1.1.3"
+        "etherlime-lib": "^1.1.3",
+        "truffle-security": "^1.5.5"
     }
 }
