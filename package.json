@@ -3,8 +3,7 @@
     "version": "1.0.0",
     "description": "Boilerplate for hackathons.",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
-        "build": "cd web && ng build --prod --build-optimizer --aot=true"
+        "test": "echo \"Error: no test specified\" && exit 1"
     },
     "author": "",
     "license": "ISC",
