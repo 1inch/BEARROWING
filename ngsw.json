@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1566636298342,
+  "timestamp": 1566636703392,
   "index": "/index.html",
   "assetGroups": [
     {
@@ -8,14 +8,14 @@
       "installMode": "prefetch",
       "updateMode": "prefetch",
       "urls": [
-        "/5.fa151ca55e1c78ed46fa.js",
+        "/5.feb3a4abcf57032c7995.js",
         "/favicon.ico",
         "/index.html",
-        "/main.21a9b4c4b64b490db8d8.js",
+        "/main.3be37d8e3cf1ff23a0c3.js",
         "/manifest.webmanifest",
         "/polyfills-es5.00649c859305d5e56b68.js",
         "/polyfills.e9e9a6cf308ffd94d85b.js",
-        "/runtime.9061a4026ab004c932c6.js",
+        "/runtime.9445d478b92e250fce0e.js",
         "/styles.90520a50af80ebf3ffb0.css"
       ],
       "patterns": []
@@ -25,8 +25,10 @@
       "installMode": "lazy",
       "updateMode": "prefetch",
       "urls": [
+        "/assets/aave-logo-color.svg",
         "/assets/bitski.png",
         "/assets/bittrex.png",
+        "/assets/compound-v2.svg",
         "/assets/cryptomaniacs.png",
         "/assets/dark-theme-logo.svg",
         "/assets/dark-theme-logo@2x.png",
@@ -45,6 +47,7 @@
         "/assets/favicon/safari-pinned-tab.svg",
         "/assets/favicon/site.webmanifest",
         "/assets/fortmatic.png",
+        "/assets/fulcrum.png",
         "/assets/icon.svg",
         "/assets/icon@2x.png",
         "/assets/icon@4x.png",
@@ -64,6 +67,7 @@
         "/assets/light-theme-small-logo@2x.png",
         "/assets/light-theme-small-logo@4x.png",
         "/assets/metamask-fox.svg",
+        "/assets/nuo.png",
         "/assets/portis.png",
         "/assets/portis.svg",
         "/assets/squarelink.png",
@@ -76,9 +80,11 @@
   ],
   "dataGroups": [],
   "hashTable": {
-    "/5.fa151ca55e1c78ed46fa.js": "7ff34758c1a8ccc84d9bf20b35923531fc9d71e8",
+    "/5.feb3a4abcf57032c7995.js": "0037f9496bd42c50d90666879b907af745b9e197",
+    "/assets/aave-logo-color.svg": "5c628f3d06d638803f05ddd71e75d4a75bb37434",
     "/assets/bitski.png": "dd2f392552aebcd2d25b91c0d18d067b149baa25",
     "/assets/bittrex.png": "1a88c780872241b4d4340c9ed2ddd5bd0f6d208a",
+    "/assets/compound-v2.svg": "377a02fce00a88d4bc61c12a0e2aeb51c9949b62",
     "/assets/cryptomaniacs.png": "550cf4c6ce74f53a3d5f975f3a0b033bda6de8f8",
     "/assets/dark-theme-logo.svg": "3de9f4462f2ffe62bc3473fcac0d954bf539eef2",
     "/assets/dark-theme-logo@2x.png": "397690005b69de514cda6369d3006d1933cc598d",
@@ -97,6 +103,7 @@
     "/assets/favicon/safari-pinned-tab.svg": "76119995458730324cb56b1c185eec87555c8de0",
     "/assets/favicon/site.webmanifest": "13e5aa58eb2182d8ace63266856c8cc29c47c083",
     "/assets/fortmatic.png": "79032bc1381dd166307e1a192228d55977a624ed",
+    "/assets/fulcrum.png": "50cde07e2b97390657a3922211ec0e79111e9e97",
     "/assets/icon.svg": "d6e826fbec8b28866c51557c0d6003574890a697",
     "/assets/icon@2x.png": "cf4801c6ecbb3b02ecf8443ca9360e04cc1781eb",
     "/assets/icon@4x.png": "dcac050a8fa17d06211d54a9b5c6b4f558c94c60",
@@ -116,6 +123,7 @@
     "/assets/light-theme-small-logo@2x.png": "19f42314e634e4a6dc7bfbeea2d43093d0cd373d",
     "/assets/light-theme-small-logo@4x.png": "e7bfad59977a8544f4ba4cc40876cc249af6a614",
     "/assets/metamask-fox.svg": "7c97da073d6945fc99a644d835c1948cb2f41219",
+    "/assets/nuo.png": "5c5c49546cf006875729df38966f34742fa88760",
     "/assets/portis.png": "d968f5751f7f0cc17524719dfa3035a4107166ad",
     "/assets/portis.svg": "dc51e44205b4f3078bb194d68a5950a109804b04",
     "/assets/squarelink.png": "d64459f5e27c80cd2a51be892cc2bd632308869d",
@@ -123,12 +131,12 @@
     "/assets/trust-wallet.png": "7fcf5ba66868259c8ddb9526ff15999f62ec25c2",
     "/assets/wallet-connect.png": "405a77eb97c6d08b2f1a6a793e128a607ea2e881",
     "/favicon.ico": "84161b857f5c547e3699ddfbffc6d8d737542e01",
-    "/index.html": "81dceb1e3325dd771c6353a1cd67c7c7aa71052f",
-    "/main.21a9b4c4b64b490db8d8.js": "c6af5a54f683eefefb4d02c19fdd418449b59dce",
+    "/index.html": "4e791396505f7f19e0dcf2b8d5f9736ea523a0e4",
+    "/main.3be37d8e3cf1ff23a0c3.js": "aa4f77738a575c93a43ddfbf04a539f4676cad6b",
     "/manifest.webmanifest": "c92d7dc3616fe94626656601a4c1cf0a5e9fc359",
     "/polyfills-es5.00649c859305d5e56b68.js": "a88ef36b98b451702806a53abb9bfecb67c4902e",
     "/polyfills.e9e9a6cf308ffd94d85b.js": "6ab9394f2ccbaa21b77d58178553d9ace4d6f498",
-    "/runtime.9061a4026ab004c932c6.js": "43eff0f04064297278c2efbf3aab933979f995c8",
+    "/runtime.9445d478b92e250fce0e.js": "3aca2ec3dccf70357b604b95811ae6791cc96350",
     "/styles.90520a50af80ebf3ffb0.css": "2d0528b16092e339759fec4569ad5d26fd45ec4a"
   },
   "navigationUrls": [
