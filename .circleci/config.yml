@@ -17,10 +17,10 @@ jobs:
             - checkout
             - restore_cache:
                   keys:
-                      - v2-dependencies-{{ checksum "package.json" }}-{{ checksum "web/package.json" }}
+                      - dependencies-{{ checksum "package.json" }}-{{ checksum "web/package.json" }}
             - run:
                   name: Install build dependencies
-                  command: yarn install --frozen-lockfile
+                  command: yarn install
             - run:
                   name: Install web dependencies
                   command: cd web && yarn install --frozen-lockfile
@@ -28,7 +28,7 @@ jobs:
                   paths:
                       - node_modules
                       - web/node_modules
-                  key: v2-dependencies-{{ checksum "package.json" }}-{{ checksum "web/package.json" }}
+                  key: dependencies-{{ checksum "package.json" }}-{{ checksum "web/package.json" }}
             #      - run:
             #          name: Run lint
             #          command: yarn run lint
@@ -78,7 +78,7 @@ jobs:
                       fi
             - run:
                   name: MyTHX test
-                  command: truffle run verify
+                  command: yarn run verify
 #      - deploy:
 #          name: Deploy Smart Contract
 #          command: |

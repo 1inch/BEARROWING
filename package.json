@@ -6,7 +6,8 @@
         "sm:test": "scripts/test.sh",
         "sm:compile": "etherlime compile --runs 200",
         "sm:deploy:dev": "etherlime compile && etherlime deploy",
-        "sm:flat": "etherlime flatten CompoundTokenization.sol && etherlime flatten LoanPool.sol"
+        "sm:flat": "etherlime flatten CompoundTokenization.sol && etherlime flatten LoanPool.sol",
+        "verify": "truffle run verify"
     },
     "author": "",
     "license": "ISC",
