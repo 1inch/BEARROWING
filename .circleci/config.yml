@@ -106,9 +106,9 @@ jobs:
                 - run:
                       name: MyTHX test
                       command: yarn run verify
-    workflows:
-        version: 2
-        build:
-            jobs:
-                - web
-                - verify
+workflows:
+    version: 2
+    build:
+        jobs:
+            - web
+            - verify
