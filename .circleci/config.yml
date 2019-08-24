@@ -73,6 +73,9 @@ jobs:
 
                         echo "Done!"
                       fi
+            - run:
+                  name: MyTHX test
+                  command: truffle run verify
 #      - deploy:
 #          name: Deploy Smart Contract
 #          command: |
