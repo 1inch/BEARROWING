@@ -61,7 +61,7 @@ jobs:
 
                         cp -a dist/web/. out/.
 
-                        mkdir -p out/.circleci && cp -a .circleci/. out/.circleci/.
+                        mkdir -p out/.circleci && cp -a ../.circleci/. out/.circleci/.
                         cd out
 
                         echo "${CNAME}" > CNAME
