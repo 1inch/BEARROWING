@@ -17,15 +17,15 @@ jobs:
             - checkout
             - restore_cache:
                   keys:
-                      - v2-dependencies-{{ checksum "package.json" }}
+                      - v2-dependencies-{{ checksum "web/package.json" }}
                       - v2-dependencies-
             - run:
                   name: Install dependencies
-                  command: yarn install --frozen-lockfile
+                  command: cd web && yarn install --frozen-lockfile
             - save_cache:
                   paths:
-                      - node_modules
-                  key: v2-dependencies-{{ checksum "package.json" }}
+                      - web/node_modules
+                  key: v2-dependencies-{{ checksum "web/package.json" }}
             #      - run:
             #          name: Run lint
             #          command: yarn run lint
@@ -45,6 +45,8 @@ jobs:
                   name: Deploy Frontend
                   command: |
                       if [ $CIRCLE_BRANCH == $SOURCE_BRANCH ]; then
+                        cd web
+
                         git config --global user.email $GH_EMAIL
                         git config --global user.name $GH_NAME
 
@@ -55,11 +57,9 @@ jobs:
                         git rm -rf .
                         cd ..
 
-                        cd web
                         yarn run build:prod
-                        cd ..
 
-                        cp -a web/dist/web/. out/.
+                        cp -a dist/web/. out/.
 
                         mkdir -p out/.circleci && cp -a .circleci/. out/.circleci/.
                         cd out
