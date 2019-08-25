@@ -4,6 +4,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol"
 import "./ILoanPool.sol";
 import "./UniversalERC20.sol";
 
@@ -13,6 +14,12 @@ contract LoanPool is ERC20, ERC20Detailed, ILoanPool {
     using UniversalERC20 for IERC20;
 
     IERC20 public token;
+    uint256 public _inLending = 1;
+
+    modifier notInLending {
+        require(_inLending == 1);
+        _;
+    }
 
     constructor(IERC20 theToken) public ERC20Detailed("LoanPool", "LP", 18) {
         token = theToken;
@@ -22,8 +29,13 @@ contract LoanPool is ERC20, ERC20Detailed, ILoanPool {
         require(token == IERC20(0) && msg.sender != tx.origin);
     }
 
-    function deposit(uint256 value) public payable {
-
+    function deposit(
+        uint256 value
+    )
+        public
+        notInLending
+        payable
+    {
         token.universalTransferFrom(msg.sender, address(this), value);
 
         uint256 amount = value;
@@ -36,7 +48,12 @@ contract LoanPool is ERC20, ERC20Detailed, ILoanPool {
         _mint(msg.sender, amount);
     }
 
-    function withdrawal(uint256 share) public {
+    function withdrawal(
+        uint256 share
+    )
+        public
+        notInLending
+    {
         token.universalTransfer(
             msg.sender,
             share
@@ -59,7 +76,9 @@ contract LoanPool is ERC20, ERC20Detailed, ILoanPool {
             .add(amount.mul(1e14).div(1e18));
         tkn.universalTransfer(address(loaner), amount);
 
+        _inLending++;
         loaner.inLoan(amount.add(amount.mul(1e14).div(1e18)), data);
+        _inLending--;
 
         require(tkn.universalBalanceOf(address(this)) >= expectedBalance, "Forgot to repay");
     }
