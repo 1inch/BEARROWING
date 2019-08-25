@@ -202,4 +202,9 @@ export class CompoundService {
                 });
         }
     }
+
+    async borrow(tokenSymbol: string, amount: BigNumber) {
+
+        return true;
+    }
 }

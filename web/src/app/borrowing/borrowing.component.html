@@ -72,14 +72,22 @@
                                 <span>
                                     <img [src]="'assets/' + pool.icon" width="32"> {{pool.name}}
                                     <span class="text-success">
-                                        136% <sup>lending/borrowing</sup>
+                                        {{pool.collateralisation}}% <sup>lending/borrowing</sup>
                                     </span>
                                 </span>
-                                <span class="badge badge-pill badge-success position-absolute" style="right: 20px;">Healthy</span>
+                                <button (click)="migrateFromPool(pool)"
+                                        class="badge badge-secondary position-absolute" style="right: 20px;">
+                                    <fa-icon [icon]="fileInvoiceDollarIcon"></fa-icon>
+                                    migrate
+                                </button>
                             </h5>
                             <div class="card-text row">
                                 <div class="col-12 col-md-6 text-center border-right">
-                                    <h5 class="border-bottom pb-2" style="font-weight: 300;">Collateral</h5>
+                                    <h5
+                                        *ngIf="pool.tokensWithBalance"
+                                        class="border-bottom pb-2"
+                                        style="font-weight: 300;"
+                                    >Collateral</h5>
                                     <table class="table">
                                         <tr *ngFor="let token of pool.tokensWithBalance">
                                             <td class="border-top-0 text-left p-1">
@@ -97,18 +105,34 @@
                                                             class="badge badge-success">
                                                         <fa-icon [icon]="plusCircleIcon"></fa-icon>
                                                     </button>
-                                                    <button (click)="withdraw(pool, token)"
+                                                    <button (click)="openWithdrawModal(pool, token)"
                                                             class="badge badge-danger ml-1">
                                                         <fa-icon [icon]="minusCircleIcon"></fa-icon>
                                                     </button>
                                                 </span>
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <td class="border-top-0" colspan="3">
+                                                <div [ngClass]="pool.tokensWithBalance ? 'border-top' : ''"
+                                                     class="pt-2">
+                                                    <button (click)="openNewLendModal(pool)"
+                                                            class="badge badge-success">
+                                                        <fa-icon [icon]="plusCircleIcon"></fa-icon>
+                                                        new
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
                                     </table>
                                 </div>
 
                                 <div class="col-12 col-md-6 text-center">
-                                    <h5 class="border-bottom pb-2" style="font-weight: 300;">Debt</h5>
+                                    <h5
+                                        *ngIf="pool.tokensWithBorrowedBalance"
+                                        class="border-bottom pb-2"
+                                        style="font-weight: 300;"
+                                    >Debt</h5>
                                     <table class="table">
                                         <tr *ngFor="let token of pool.tokensWithBorrowedBalance">
                                             <td class="border-top-0 text-left p-1">
@@ -122,13 +146,27 @@
                                             </td>
                                             <td class="border-top-0 text-right p-1">
                                                 <span style="white-space: nowrap;">
-                                                    <a class="badge badge-success" href="#">
+                                                    <button (click)="openBorrowModal(pool, token)"
+                                                            class="badge badge-success">
                                                         <fa-icon [icon]="plusCircleIcon"></fa-icon>
-                                                    </a>
-                                                    <a class="badge badge-danger ml-1" href="#">
+                                                    </button>
+                                                    <button (click)="openRepayModal(pool, token)"
+                                                            class="badge badge-danger ml-1">
                                                         <fa-icon [icon]="minusCircleIcon"></fa-icon>
-                                                    </a>
+                                                    </button>
                                                 </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border-top-0" colspan="3">
+                                                <div [ngClass]="pool.tokensWithBorrowedBalance ? 'border-top' : ''"
+                                                     class="pt-2">
+                                                    <button (click)="openNewLendModal(pool)"
+                                                            class="badge badge-success">
+                                                        <fa-icon [icon]="plusCircleIcon"></fa-icon>
+                                                        new
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     </table>
@@ -144,6 +182,56 @@
     </div>
 </div>
 
+<ng-template #repayTemplate>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">
+            Repay
+        </h4>
+        <button (click)="repayTemplateModalRef.hide()" aria-label="Close" class="close pull-right" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+
+        <div *ngIf="modalLoading">
+            <app-loading-spinner></app-loading-spinner>
+        </div>
+
+        <div *ngIf="!modalLoading">
+            <h4 class="text-center" style="font-weight: 300;">
+                Token: {{fromToken}}
+                <img [ngClass]="'token-' + tokenService.tokens[fromToken].symbol.toLowerCase()"
+                     [src]="'assets/tokens/' + tokenService.tokens[fromToken].address.toLowerCase() + '.png'"
+                     width="22">&nbsp;
+            </h4>
+
+            <form #f="ngForm" class="pt-4" novalidate>
+                <div class="form-row justify-content-md-center">
+                    <div class="form-group col-md-12">
+                        <small (click)="setFromTokenAmount()"
+                               class="form-text text-muted text-left position-relative mb-1"
+                               id="fromTokenBalance"
+                               style="margin-top: -23px; white-space: nowrap;overflow: hidden;text-overflow: ellipsis; cursor: pointer;">
+                            Max: {{tokenService.toFixed(fromTokenBalance, 12)}}
+                            <span *ngIf="fromToken === 'ETH'">(-5% for gas)</span>
+                        </small>
+                        <input [formControl]="fromTokenAmountControl"
+                               aria-describedby="fromTokenBalance" autocomplete="off"
+                               class="form-control text-left" id="fromTokenAmount" inputmode="numeric"
+                               name="fromTokenAmount" numeric numericType="decimal" pattern="[0-9]*" placeholder="0"
+                               type="string">
+
+                        <div class="mt-3 text-center">
+                            <button (click)="repay()" class="btn btn-success">
+                                Repay
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</ng-template>
 
 <ng-template #lendTemplate>
     <div class="modal-header">
@@ -187,6 +275,144 @@
                         <div class="mt-3 text-center">
                             <button (click)="lend()" class="btn btn-success">
                                 Lend
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</ng-template>
+<ng-template #newLendTemplate>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">
+            Lend new token
+        </h4>
+        <button (click)="newLendTemplateModalRef.hide()" aria-label="Close" class="close pull-right" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+
+        <div *ngIf="modalLoading">
+            <app-loading-spinner></app-loading-spinner>
+        </div>
+
+        <div *ngIf="!modalLoading">
+            <h4 class="text-center" style="font-weight: 300;">
+                Token: {{fromToken}}
+                <img [ngClass]="'token-' + tokenService.tokens[fromToken].symbol.toLowerCase()"
+                     [src]="'assets/tokens/' + tokenService.tokens[fromToken].address.toLowerCase() + '.png'"
+                     width="22">&nbsp;
+            </h4>
+
+            <form #f="ngForm" class="pt-4" novalidate>
+                <div class="form-row justify-content-md-center">
+                    <div class="form-group col-md-12">
+                        <small (click)="setFromTokenAmount()"
+                               class="form-text text-muted text-left position-relative mb-1"
+                               id="fromTokenBalance"
+                               style="margin-top: -23px; white-space: nowrap;overflow: hidden;text-overflow: ellipsis; cursor: pointer;">
+                            Max: {{tokenService.toFixed(fromTokenBalance, 12)}}
+                            <span *ngIf="fromToken === 'ETH'">(-5% for gas)</span>
+                        </small>
+                        <input [formControl]="fromTokenAmountControl"
+                               aria-describedby="fromTokenBalance" autocomplete="off"
+                               class="form-control text-left" id="fromTokenAmount" inputmode="numeric"
+                               name="fromTokenAmount" numeric numericType="decimal" pattern="[0-9]*" placeholder="0"
+                               type="string">
+
+                        <div class="mt-3 text-center">
+                            <button (click)="lend()" class="btn btn-success">
+                                Lend new
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #borrowTemplate>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">
+            Borrow
+        </h4>
+        <button (click)="borrowTemplateModalRef.hide()" aria-label="Close" class="close pull-right" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+
+        <div *ngIf="modalLoading">
+            <app-loading-spinner></app-loading-spinner>
+        </div>
+
+        <div *ngIf="!modalLoading">
+            <h4 class="text-center" style="font-weight: 300;">
+                Token: {{fromToken}}
+                <img [ngClass]="'token-' + tokenService.tokens[fromToken].symbol.toLowerCase()"
+                     [src]="'assets/tokens/' + tokenService.tokens[fromToken].address.toLowerCase() + '.png'"
+                     width="22">&nbsp;
+            </h4>
+
+            <form #f="ngForm" class="pt-4" novalidate>
+                <div class="form-row justify-content-md-center">
+                    <div class="form-group col-md-12">
+                        <input [formControl]="fromTokenAmountControl"
+                               aria-describedby="fromTokenBalance" autocomplete="off"
+                               class="form-control text-left" id="fromTokenAmount" inputmode="numeric"
+                               name="fromTokenAmount" numeric numericType="decimal" pattern="[0-9]*" placeholder="0"
+                               type="string">
+
+                        <div class="mt-3 text-center">
+                            <button (click)="borrow()" class="btn btn-success">
+                                Borrow
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</ng-template>
+
+<ng-template #withdrawTemplate>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">
+            Withdraw
+        </h4>
+        <button (click)="withdrawTemplateModalRef.hide()" aria-label="Close" class="close pull-right" type="button">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+
+        <div *ngIf="modalLoading">
+            <app-loading-spinner></app-loading-spinner>
+        </div>
+
+        <div *ngIf="!modalLoading">
+            <h4 class="text-center" style="font-weight: 300;">
+                Token: {{fromToken}}
+                <img [ngClass]="'token-' + tokenService.tokens[fromToken].symbol.toLowerCase()"
+                     [src]="'assets/tokens/' + tokenService.tokens[fromToken].address.toLowerCase() + '.png'"
+                     width="22">&nbsp;
+            </h4>
+
+            <form #f="ngForm" class="pt-4" novalidate>
+                <div class="form-row justify-content-md-center">
+                    <div class="form-group col-md-12">
+                        <input [formControl]="fromTokenAmountControl"
+                               aria-describedby="fromTokenBalance" autocomplete="off"
+                               class="form-control text-left" id="fromTokenAmount" inputmode="numeric"
+                               name="fromTokenAmount" numeric numericType="decimal" pattern="[0-9]*" placeholder="0"
+                               type="string">
+
+                        <div class="mt-3 text-center">
+                            <button (click)="withdraw()" class="btn btn-success">
+                                Withdraw
                             </button>
                         </div>
                     </div>
