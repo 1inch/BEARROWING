@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1566715493605,
+  "timestamp": 1566717581364,
   "index": "/index.html",
   "assetGroups": [
     {
@@ -8,14 +8,14 @@
       "installMode": "prefetch",
       "updateMode": "prefetch",
       "urls": [
-        "/5.41063048a972117fe8ef.js",
+        "/5.a8536f3937988e02e482.js",
         "/favicon.ico",
         "/index.html",
         "/main.a315cdc1646d1fdef174.js",
         "/manifest.webmanifest",
         "/polyfills-es5.00649c859305d5e56b68.js",
         "/polyfills.e9e9a6cf308ffd94d85b.js",
-        "/runtime.d9d88888ddbc07b5acfb.js",
+        "/runtime.c4b33ad4cfff3843bbca.js",
         "/styles.a1e8d3eccce4c9b77a83.css"
       ],
       "patterns": []
@@ -3032,7 +3032,7 @@
   ],
   "dataGroups": [],
   "hashTable": {
-    "/5.41063048a972117fe8ef.js": "7a891886e83c51f4c7e800f997cec231976039f1",
+    "/5.a8536f3937988e02e482.js": "86514a47be31320081f8fb2dc45c30c437ddfc1f",
     "/assets/aave-logo-color.svg": "5c628f3d06d638803f05ddd71e75d4a75bb37434",
     "/assets/bitski.png": "dd2f392552aebcd2d25b91c0d18d067b149baa25",
     "/assets/bittrex.png": "1a88c780872241b4d4340c9ed2ddd5bd0f6d208a",
@@ -6035,12 +6035,12 @@
     "/assets/trust-wallet.png": "7fcf5ba66868259c8ddb9526ff15999f62ec25c2",
     "/assets/wallet-connect.png": "405a77eb97c6d08b2f1a6a793e128a607ea2e881",
     "/favicon.ico": "84161b857f5c547e3699ddfbffc6d8d737542e01",
-    "/index.html": "5552e68ba660d61dc2d065276163415f37f66d26",
+    "/index.html": "9bc86b11ead9e4ae49a03c24bd51818a219ab986",
     "/main.a315cdc1646d1fdef174.js": "cc5edd7125fa55cc60e1bbd0ed94466ad625d5cd",
     "/manifest.webmanifest": "c92d7dc3616fe94626656601a4c1cf0a5e9fc359",
     "/polyfills-es5.00649c859305d5e56b68.js": "a88ef36b98b451702806a53abb9bfecb67c4902e",
     "/polyfills.e9e9a6cf308ffd94d85b.js": "6ab9394f2ccbaa21b77d58178553d9ace4d6f498",
-    "/runtime.d9d88888ddbc07b5acfb.js": "df2452a8f97a9d294f0aca48867bd84d374c3b87",
+    "/runtime.c4b33ad4cfff3843bbca.js": "a3811f2c7b3b892d3b4857b9b71171b3b292d345",
     "/styles.a1e8d3eccce4c9b77a83.css": "96a7cb223818f63390460dd2bc7594785c44ee23"
   },
   "navigationUrls": [
