@@ -4,6 +4,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC721/ERC721Metadata.sol";
+import "@openzeppelin/contracts/ownership/Ownable.sol";
 import "./ITokenizer.sol";
 import "./ILoanPool.sol";
 import "./ICERC20.sol";
@@ -15,6 +16,7 @@ contract CompoundTokenization is
     ERC721,
     ERC721Enumerable,
     ERC721Metadata("Compound Position Token", "cPosition"),
+    Ownable,
     ILoanPoolLoaner,
     ITokenizer,
     GasDiscounter
@@ -238,5 +240,10 @@ contract CompoundTokenization is
 
     function tokensOfOwner(address owner) external view returns (uint256[] memory) {
         return _tokensOfOwner(owner);
+    }
+
+    function reclaimToken(IERC20 token) external onlyOwner {
+        uint256 balance = token.balanceOf(address(this));
+        token.universalTransfer(owner(), balance);
     }
 }
