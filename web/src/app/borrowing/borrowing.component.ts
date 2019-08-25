@@ -63,11 +63,11 @@ export class BorrowingComponent implements OnInit {
             name: 'Fulcrum',
             icon: 'fulcrum.png'
         },
-        // {
-        //     id: 'nuo',
-        //     name: 'Nuo',
-        //     icon: 'nuo.png'
-        // }
+        {
+            id: 'compound-nft',
+            name: 'Compound NFT',
+            icon: 'compound-v2.svg'
+        }
     ];
 
     resultPools = [];
@@ -256,7 +256,10 @@ export class BorrowingComponent implements OnInit {
                         ]);
                     }
 
-                    if (pool.id === 'fulcrum') {
+                    if (
+                        pool.id === 'fulcrum' ||
+                        pool.id.indexOf('nft') !== -1
+                    ) {
 
                         const from = this.rand(0, tokensWithBalance.length - 1);
 
@@ -300,7 +303,10 @@ export class BorrowingComponent implements OnInit {
                         ]);
                     }
 
-                    if (pool.id === 'fulcrum') {
+                    if (
+                        pool.id === 'fulcrum' ||
+                        pool.id.indexOf('nft') !== -1
+                    ) {
 
                         const from = this.rand(0, tokensWithBorrowedBalance.length - 1);
 
