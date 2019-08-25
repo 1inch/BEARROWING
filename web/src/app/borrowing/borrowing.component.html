@@ -82,16 +82,16 @@
                                     <h5 class="border-bottom pb-2" style="font-weight: 300;">Collateral</h5>
                                     <table class="table">
                                         <tr *ngFor="let token of pool.tokensWithBalance">
-                                            <td class="border-top-0 text-left">
+                                            <td class="border-top-0 text-left p-1">
                                                 {{token.balance}}
                                             </td>
-                                            <td class="border-top-0 text-left" style="white-space: nowrap;">
+                                            <td class="border-top-0 text-left p-1" style="white-space: nowrap;">
                                                 <img [ngClass]="'token-' + token.symbol.toLowerCase()"
                                                      [src]="'assets/tokens/' + token.address.toLowerCase() + '.png'"
                                                      width="22">&nbsp;
                                                 {{token.symbol}}
                                             </td>
-                                            <td class="border-top-0 text-right">
+                                            <td class="border-top-0 text-right p-1">
                                                 <span style="white-space: nowrap;">
                                                     <button (click)="openLendModal(pool, token)"
                                                             class="badge badge-success">
@@ -111,16 +111,16 @@
                                     <h5 class="border-bottom pb-2" style="font-weight: 300;">Debt</h5>
                                     <table class="table">
                                         <tr *ngFor="let token of pool.tokensWithBorrowedBalance">
-                                            <td class="border-top-0 text-left">
+                                            <td class="border-top-0 text-left p-1">
                                                 {{token.balance}}
                                             </td>
-                                            <td class="border-top-0 text-left">
+                                            <td class="border-top-0 text-left p-1">
                                                 <img [ngClass]="'token-' + token.symbol.toLowerCase()"
                                                      [src]="'assets/tokens/' + token.address.toLowerCase() + '.png'"
                                                      width="22">&nbsp;
                                                 {{token.symbol}}
                                             </td>
-                                            <td class="border-top-0 text-right">
+                                            <td class="border-top-0 text-right p-1">
                                                 <span style="white-space: nowrap;">
                                                     <a class="badge badge-success" href="#">
                                                         <fa-icon [icon]="plusCircleIcon"></fa-icon>

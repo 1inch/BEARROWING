@@ -102,7 +102,7 @@ export class CompoundService {
                             // @ts-ignore
                             balanceBN
                         ),
-                        6
+                        5
                     );
                 } else {
 
