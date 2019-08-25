@@ -282,6 +282,7 @@ export class BorrowingComponent implements OnInit {
             console.error(e);
         }
 
+        this.lendTemplateModalRef.hide();
         this.modalLoading = false;
     }
 
