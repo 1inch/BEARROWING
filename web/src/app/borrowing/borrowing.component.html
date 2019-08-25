@@ -114,7 +114,7 @@
                                         </tr>
                                         <tr>
                                             <td class="border-top-0" colspan="3">
-                                                <div [ngClass]="pool.tokensWithBalance ? 'border-top' : ''"
+                                                <div *ngIf="pool.tokensWithBalance.length != 1" [ngClass]="pool.tokensWithBalance ? 'border-top' : ''"
                                                      class="pt-2">
                                                     <button (click)="openNewLendModal(pool)"
                                                             class="badge badge-success">
@@ -159,7 +159,7 @@
                                         </tr>
                                         <tr>
                                             <td class="border-top-0" colspan="3">
-                                                <div [ngClass]="pool.tokensWithBorrowedBalance ? 'border-top' : ''"
+                                                <div *ngIf="pool.tokensWithBorrowedBalance.length != 1" [ngClass]="pool.tokensWithBorrowedBalance ? 'border-top' : ''"
                                                      class="pt-2">
                                                     <button (click)="openNewLendModal(pool)"
                                                             class="badge badge-success">
