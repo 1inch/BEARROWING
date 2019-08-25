@@ -63,11 +63,11 @@ export class BorrowingComponent implements OnInit {
             name: 'Fulcrum',
             icon: 'fulcrum.png'
         },
-        {
-            id: 'nuo',
-            name: 'Nuo',
-            icon: 'nuo.png'
-        }
+        // {
+        //     id: 'nuo',
+        //     name: 'Nuo',
+        //     icon: 'nuo.png'
+        // }
     ];
 
     resultPools = [];
@@ -256,6 +256,15 @@ export class BorrowingComponent implements OnInit {
                         ]);
                     }
 
+                    if (pool.id === 'fulcrum') {
+
+                        const from = this.rand(0, tokensWithBalance.length - 1);
+
+                        tokensWithBalance = tokensWithBalance.slice(
+                            from, from + 1
+                        );
+                    }
+
                     tokensWithBalance = tokensWithBalance.map(token => {
 
                         token['balance'] = this.rand(1, 10000) / 10000;
@@ -289,6 +298,15 @@ export class BorrowingComponent implements OnInit {
                             Object.assign({}, this.tokenService.tokens['WBTC']),
                             Object.assign({}, this.tokenService.tokens['BAT']),
                         ]);
+                    }
+
+                    if (pool.id === 'fulcrum') {
+
+                        const from = this.rand(0, tokensWithBorrowedBalance.length - 1);
+
+                        tokensWithBorrowedBalance = tokensWithBorrowedBalance.slice(
+                            from, from + 1
+                        );
                     }
 
                     tokensWithBorrowedBalance = tokensWithBorrowedBalance.map(token => {
@@ -390,6 +408,7 @@ export class BorrowingComponent implements OnInit {
 
         this.repayTemplateModalRef = this.modalService.show(this.repayTemplate);
     }
+
 
     isNumeric(str) {
         return /^\d*\.{0,1}\d*$/.test(str);

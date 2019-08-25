@@ -65,8 +65,8 @@
                         CONNECT
                     </button>
                 </div>
-                <div *ngFor="let pool of resultPools" class="col-12 col-md-6 mb-3 mt-md-0">
-                    <div class="card">
+                <div *ngFor="let pool of resultPools" class="col-12 col-md-6 mb-4 mt-md-0">
+                    <div class="card" style="min-height: 350px;">
                         <div class="card-body">
                             <h5 class="card-title border-bottom pb-2 d-flex justify-content-between">
                                 <span>
@@ -88,7 +88,7 @@
                                         class="border-bottom pb-2"
                                         style="font-weight: 300;"
                                     >Collateral</h5>
-                                    <table class="table">
+                                    <table class="table mb-0">
                                         <tr *ngFor="let token of pool.tokensWithBalance">
                                             <td class="border-top-0 text-left p-1">
                                                 {{token.balance}}
