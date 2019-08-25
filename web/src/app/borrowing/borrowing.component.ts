@@ -9,6 +9,7 @@ import {TokenService} from '../token.service';
 import {BsModalRef, BsModalService} from 'ngx-bootstrap';
 import {FormControl} from '@angular/forms';
 import {debounceTime, distinctUntilChanged, filter} from 'rxjs/operators';
+import {ThegraphService} from './thegraph.service';
 
 @Component({
     selector: 'app-borrowing',
@@ -83,12 +84,18 @@ export class BorrowingComponent implements OnInit {
     modalLoading = false;
 
     constructor(
-        protected web3Service: Web3Service,
+        public web3Service: Web3Service,
         protected compoundService: CompoundService,
         protected connectService: ConnectService,
         protected tokenService: TokenService,
-        private modalService: BsModalService
+        protected modalService: BsModalService,
+        protected thegraphService: ThegraphService
     ) {
+
+        this.web3Service.disconnectEvent.subscribe(async () => {
+
+            this.notConnected = true;
+        });
 
         this.web3Service.connectEvent.subscribe(async () => {
 
@@ -123,7 +130,9 @@ export class BorrowingComponent implements OnInit {
                 this.loading = false;
             }
 
-        }, 9000);
+        }, 3000);
+
+        this.thegraphService.getCollateralisation();
     }
 
     async ngOnInit() {
