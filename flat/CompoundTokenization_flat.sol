@@ -76,6 +76,81 @@ interface IERC20 {
 }
 
 
+/**
+ * @dev Contract module which provides a basic access control mechanism, where
+ * there is an account (an owner) that can be granted exclusive access to
+ * specific functions.
+ *
+ * This module is used through inheritance. It will make available the modifier
+ * `onlyOwner`, which can be aplied to your functions to restrict their use to
+ * the owner.
+ */
+contract Ownable {
+    address private _owner;
+
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+
+    /**
+     * @dev Initializes the contract setting the deployer as the initial owner.
+     */
+    constructor () internal {
+        _owner = msg.sender;
+        emit OwnershipTransferred(address(0), _owner);
+    }
+
+    /**
+     * @dev Returns the address of the current owner.
+     */
+    function owner() public view returns (address) {
+        return _owner;
+    }
+
+    /**
+     * @dev Throws if called by any account other than the owner.
+     */
+    modifier onlyOwner() {
+        require(isOwner(), "Ownable: caller is not the owner");
+        _;
+    }
+
+    /**
+     * @dev Returns true if the caller is the current owner.
+     */
+    function isOwner() public view returns (bool) {
+        return msg.sender == _owner;
+    }
+
+    /**
+     * @dev Leaves the contract without owner. It will not be possible to call
+     * `onlyOwner` functions anymore. Can only be called by the current owner.
+     *
+     * > Note: Renouncing ownership will leave the contract without an owner,
+     * thereby removing any functionality that is only available to the owner.
+     */
+    function renounceOwnership() public onlyOwner {
+        emit OwnershipTransferred(_owner, address(0));
+        _owner = address(0);
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     * Can only be called by the current owner.
+     */
+    function transferOwnership(address newOwner) public onlyOwner {
+        _transferOwnership(newOwner);
+    }
+
+    /**
+     * @dev Transfers ownership of the contract to a new account (`newOwner`).
+     */
+    function _transferOwnership(address newOwner) internal {
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        emit OwnershipTransferred(_owner, newOwner);
+        _owner = newOwner;
+    }
+}
+
+
 contract ILoanPoolLoaner {
 
     modifier withLoan(
@@ -154,6 +229,26 @@ contract LoanHolder {
         (bool success, bytes memory ret) = target.call.value(value)(data);
         require(success);
         return ret;
+    }
+}
+
+
+interface IGasToken {
+    function freeUpTo(uint256 value) external returns (uint256 freed);
+}
+
+contract GasDiscounter {
+    IGasToken constant private _gasToken = IGasToken(0x0000000000b3F879cb30FE243b4Dfee438691c04);
+
+    modifier gasDiscount() {
+        uint256 initialGasLeft = gasleft();
+        _;
+        _getGasDiscount(initialGasLeft - gasleft());
+    }
+
+    function _getGasDiscount(uint256 gasSpent) private {
+        uint256 tokens = (gasSpent + 14154) / 41130;
+        _gasToken.freeUpTo(tokens);
     }
 }
 
@@ -684,6 +779,29 @@ contract ERC165 is IERC165 {
 }
 
 
+/**
+ * @title ERC-721 Non-Fungible Token Standard, optional enumeration extension
+ * @dev See https://eips.ethereum.org/EIPS/eip-721
+ */
+contract IERC721Enumerable is IERC721 {
+    function totalSupply() public view returns (uint256);
+    function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256 tokenId);
+
+    function tokenByIndex(uint256 index) public view returns (uint256);
+}
+
+
+/**
+ * @title ERC-721 Non-Fungible Token Standard, optional metadata extension
+ * @dev See https://eips.ethereum.org/EIPS/eip-721
+ */
+contract IERC721Metadata is IERC721 {
+    function name() external view returns (string memory);
+    function symbol() external view returns (string memory);
+    function tokenURI(uint256 tokenId) external view returns (string memory);
+}
+
+
 
 
 
@@ -983,10 +1101,366 @@ contract ERC721 is ERC165, IERC721 {
 
 
 
+/**
+ * @title ERC-721 Non-Fungible Token with optional enumeration extension logic
+ * @dev See https://eips.ethereum.org/EIPS/eip-721
+ */
+contract ERC721Enumerable is ERC165, ERC721, IERC721Enumerable {
+    // Mapping from owner to list of owned token IDs
+    mapping(address => uint256[]) private _ownedTokens;
+
+    // Mapping from token ID to index of the owner tokens list
+    mapping(uint256 => uint256) private _ownedTokensIndex;
+
+    // Array with all token ids, used for enumeration
+    uint256[] private _allTokens;
+
+    // Mapping from token id to position in the allTokens array
+    mapping(uint256 => uint256) private _allTokensIndex;
+
+    /*
+     *     bytes4(keccak256('totalSupply()')) == 0x18160ddd
+     *     bytes4(keccak256('tokenOfOwnerByIndex(address,uint256)')) == 0x2f745c59
+     *     bytes4(keccak256('tokenByIndex(uint256)')) == 0x4f6ccce7
+     *
+     *     => 0x18160ddd ^ 0x2f745c59 ^ 0x4f6ccce7 == 0x780e9d63
+     */
+    bytes4 private constant _INTERFACE_ID_ERC721_ENUMERABLE = 0x780e9d63;
+
+    /**
+     * @dev Constructor function.
+     */
+    constructor () public {
+        // register the supported interface to conform to ERC721Enumerable via ERC165
+        _registerInterface(_INTERFACE_ID_ERC721_ENUMERABLE);
+    }
+
+    /**
+     * @dev Gets the token ID at a given index of the tokens list of the requested owner.
+     * @param owner address owning the tokens list to be accessed
+     * @param index uint256 representing the index to be accessed of the requested tokens list
+     * @return uint256 token ID at the given index of the tokens list owned by the requested address
+     */
+    function tokenOfOwnerByIndex(address owner, uint256 index) public view returns (uint256) {
+        require(index < balanceOf(owner), "ERC721Enumerable: owner index out of bounds");
+        return _ownedTokens[owner][index];
+    }
+
+    /**
+     * @dev Gets the total amount of tokens stored by the contract.
+     * @return uint256 representing the total amount of tokens
+     */
+    function totalSupply() public view returns (uint256) {
+        return _allTokens.length;
+    }
+
+    /**
+     * @dev Gets the token ID at a given index of all the tokens in this contract
+     * Reverts if the index is greater or equal to the total number of tokens.
+     * @param index uint256 representing the index to be accessed of the tokens list
+     * @return uint256 token ID at the given index of the tokens list
+     */
+    function tokenByIndex(uint256 index) public view returns (uint256) {
+        require(index < totalSupply(), "ERC721Enumerable: global index out of bounds");
+        return _allTokens[index];
+    }
+
+    /**
+     * @dev Internal function to transfer ownership of a given token ID to another address.
+     * As opposed to transferFrom, this imposes no restrictions on msg.sender.
+     * @param from current owner of the token
+     * @param to address to receive the ownership of the given token ID
+     * @param tokenId uint256 ID of the token to be transferred
+     */
+    function _transferFrom(address from, address to, uint256 tokenId) internal {
+        super._transferFrom(from, to, tokenId);
+
+        _removeTokenFromOwnerEnumeration(from, tokenId);
+
+        _addTokenToOwnerEnumeration(to, tokenId);
+    }
+
+    /**
+     * @dev Internal function to mint a new token.
+     * Reverts if the given token ID already exists.
+     * @param to address the beneficiary that will own the minted token
+     * @param tokenId uint256 ID of the token to be minted
+     */
+    function _mint(address to, uint256 tokenId) internal {
+        super._mint(to, tokenId);
+
+        _addTokenToOwnerEnumeration(to, tokenId);
+
+        _addTokenToAllTokensEnumeration(tokenId);
+    }
+
+    /**
+     * @dev Internal function to burn a specific token.
+     * Reverts if the token does not exist.
+     * Deprecated, use _burn(uint256) instead.
+     * @param owner owner of the token to burn
+     * @param tokenId uint256 ID of the token being burned
+     */
+    function _burn(address owner, uint256 tokenId) internal {
+        super._burn(owner, tokenId);
+
+        _removeTokenFromOwnerEnumeration(owner, tokenId);
+        // Since tokenId will be deleted, we can clear its slot in _ownedTokensIndex to trigger a gas refund
+        _ownedTokensIndex[tokenId] = 0;
+
+        _removeTokenFromAllTokensEnumeration(tokenId);
+    }
+
+    /**
+     * @dev Gets the list of token IDs of the requested owner.
+     * @param owner address owning the tokens
+     * @return uint256[] List of token IDs owned by the requested address
+     */
+    function _tokensOfOwner(address owner) internal view returns (uint256[] storage) {
+        return _ownedTokens[owner];
+    }
+
+    /**
+     * @dev Private function to add a token to this extension's ownership-tracking data structures.
+     * @param to address representing the new owner of the given token ID
+     * @param tokenId uint256 ID of the token to be added to the tokens list of the given address
+     */
+    function _addTokenToOwnerEnumeration(address to, uint256 tokenId) private {
+        _ownedTokensIndex[tokenId] = _ownedTokens[to].length;
+        _ownedTokens[to].push(tokenId);
+    }
+
+    /**
+     * @dev Private function to add a token to this extension's token tracking data structures.
+     * @param tokenId uint256 ID of the token to be added to the tokens list
+     */
+    function _addTokenToAllTokensEnumeration(uint256 tokenId) private {
+        _allTokensIndex[tokenId] = _allTokens.length;
+        _allTokens.push(tokenId);
+    }
+
+    /**
+     * @dev Private function to remove a token from this extension's ownership-tracking data structures. Note that
+     * while the token is not assigned a new owner, the _ownedTokensIndex mapping is _not_ updated: this allows for
+     * gas optimizations e.g. when performing a transfer operation (avoiding double writes).
+     * This has O(1) time complexity, but alters the order of the _ownedTokens array.
+     * @param from address representing the previous owner of the given token ID
+     * @param tokenId uint256 ID of the token to be removed from the tokens list of the given address
+     */
+    function _removeTokenFromOwnerEnumeration(address from, uint256 tokenId) private {
+        // To prevent a gap in from's tokens array, we store the last token in the index of the token to delete, and
+        // then delete the last slot (swap and pop).
+
+        uint256 lastTokenIndex = _ownedTokens[from].length.sub(1);
+        uint256 tokenIndex = _ownedTokensIndex[tokenId];
+
+        // When the token to delete is the last token, the swap operation is unnecessary
+        if (tokenIndex != lastTokenIndex) {
+            uint256 lastTokenId = _ownedTokens[from][lastTokenIndex];
+
+            _ownedTokens[from][tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
+            _ownedTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
+        }
+
+        // This also deletes the contents at the last position of the array
+        _ownedTokens[from].length--;
+
+        // Note that _ownedTokensIndex[tokenId] hasn't been cleared: it still points to the old slot (now occupied by
+        // lastTokenId, or just over the end of the array if the token was the last one).
+    }
+
+    /**
+     * @dev Private function to remove a token from this extension's token tracking data structures.
+     * This has O(1) time complexity, but alters the order of the _allTokens array.
+     * @param tokenId uint256 ID of the token to be removed from the tokens list
+     */
+    function _removeTokenFromAllTokensEnumeration(uint256 tokenId) private {
+        // To prevent a gap in the tokens array, we store the last token in the index of the token to delete, and
+        // then delete the last slot (swap and pop).
+
+        uint256 lastTokenIndex = _allTokens.length.sub(1);
+        uint256 tokenIndex = _allTokensIndex[tokenId];
+
+        // When the token to delete is the last token, the swap operation is unnecessary. However, since this occurs so
+        // rarely (when the last minted token is burnt) that we still do the swap here to avoid the gas cost of adding
+        // an 'if' statement (like in _removeTokenFromOwnerEnumeration)
+        uint256 lastTokenId = _allTokens[lastTokenIndex];
+
+        _allTokens[tokenIndex] = lastTokenId; // Move the last token to the slot of the to-delete token
+        _allTokensIndex[lastTokenId] = tokenIndex; // Update the moved token's index
+
+        // This also deletes the contents at the last position of the array
+        _allTokens.length--;
+        _allTokensIndex[tokenId] = 0;
+    }
+}
 
 
 
-contract CompoundTokenization is ERC721, ILoanPoolLoaner {
+
+contract ERC721Metadata is ERC165, ERC721, IERC721Metadata {
+    // Token name
+    string private _name;
+
+    // Token symbol
+    string private _symbol;
+
+    // Optional mapping for token URIs
+    mapping(uint256 => string) private _tokenURIs;
+
+    /*
+     *     bytes4(keccak256('name()')) == 0x06fdde03
+     *     bytes4(keccak256('symbol()')) == 0x95d89b41
+     *     bytes4(keccak256('tokenURI(uint256)')) == 0xc87b56dd
+     *
+     *     => 0x06fdde03 ^ 0x95d89b41 ^ 0xc87b56dd == 0x5b5e139f
+     */
+    bytes4 private constant _INTERFACE_ID_ERC721_METADATA = 0x5b5e139f;
+
+    /**
+     * @dev Constructor function
+     */
+    constructor (string memory name, string memory symbol) public {
+        _name = name;
+        _symbol = symbol;
+
+        // register the supported interfaces to conform to ERC721 via ERC165
+        _registerInterface(_INTERFACE_ID_ERC721_METADATA);
+    }
+
+    /**
+     * @dev Gets the token name.
+     * @return string representing the token name
+     */
+    function name() external view returns (string memory) {
+        return _name;
+    }
+
+    /**
+     * @dev Gets the token symbol.
+     * @return string representing the token symbol
+     */
+    function symbol() external view returns (string memory) {
+        return _symbol;
+    }
+
+    /**
+     * @dev Returns an URI for a given token ID.
+     * Throws if the token ID does not exist. May return an empty string.
+     * @param tokenId uint256 ID of the token to query
+     */
+    function tokenURI(uint256 tokenId) external view returns (string memory) {
+        require(_exists(tokenId), "ERC721Metadata: URI query for nonexistent token");
+        return _tokenURIs[tokenId];
+    }
+
+    /**
+     * @dev Internal function to set the token URI for a given token.
+     * Reverts if the token ID does not exist.
+     * @param tokenId uint256 ID of the token to set its URI
+     * @param uri string URI to assign
+     */
+    function _setTokenURI(uint256 tokenId, string memory uri) internal {
+        require(_exists(tokenId), "ERC721Metadata: URI set of nonexistent token");
+        _tokenURIs[tokenId] = uri;
+    }
+
+    /**
+     * @dev Internal function to burn a specific token.
+     * Reverts if the token does not exist.
+     * Deprecated, use _burn(uint256) instead.
+     * @param owner owner of the token to burn
+     * @param tokenId uint256 ID of the token being burned by the msg.sender
+     */
+    function _burn(address owner, uint256 tokenId) internal {
+        super._burn(owner, tokenId);
+
+        // Clear metadata (if any)
+        if (bytes(_tokenURIs[tokenId]).length != 0) {
+            delete _tokenURIs[tokenId];
+        }
+    }
+}
+
+
+
+
+interface ITokenizer {
+
+    function enterMarkets(
+        uint256 tokenId,
+        address controller,
+        address[] calldata cTokens
+    )
+        external
+        returns(bytes memory ret);
+
+    function migrate(
+        ILoanPool pool,
+        IERC20 collateralToken,
+        uint256 collateralAmount,
+        IERC20 borrowedToken,
+        IERC20 borrowedUnderlyingToken,
+        uint256 borrowedAmount,
+        address msgSender
+    )
+        external;
+
+    function mint(
+        uint256 tokenId,
+        IERC20 cToken,
+        IERC20 token,
+        uint256 amount
+    )
+        external
+        payable;
+
+    function redeem(
+        uint256 tokenId,
+        IERC20 cToken,
+        IERC20 token,
+        uint256 amount
+    )
+        external;
+
+    function borrow(
+        uint256 tokenId,
+        IERC20 cToken,
+        IERC20 token,
+        uint256 amount
+    )
+        external;
+
+    function repay(
+        uint256 tokenId,
+        IERC20 cToken,
+        IERC20 token,
+        uint256 amount
+    )
+        external
+        payable;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+contract CompoundTokenization is
+    ERC721,
+    ERC721Enumerable,
+    ERC721Metadata("Compound Position Token", "cPosition"),
+    Ownable,
+    ILoanPoolLoaner,
+    ITokenizer,
+    GasDiscounter
+{
 
     using UniversalERC20 for IERC20;
 
@@ -1015,7 +1489,7 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
 
     function enterMarkets(
         uint256 tokenId,
-        ICompoundController controller,
+        address controller,
         address[] calldata cTokens
     )
         external
@@ -1024,8 +1498,8 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
     {
         LoanHolder holder = LoanHolder(address(tokenId));
 
-        ret = holder.perform(address(controller), 0, abi.encodeWithSelector(
-            controller.enterMarkets.selector,
+        ret = holder.perform(controller, 0, abi.encodeWithSelector(
+            ICompoundController(controller).enterMarkets.selector,
             cTokens
         ));
     }
@@ -1034,7 +1508,7 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
         ILoanPool pool,
         IERC20 collateralToken,
         uint256 collateralAmount,
-        ICERC20 borrowedToken,
+        IERC20 borrowedToken,
         IERC20 borrowedUnderlyingToken,
         uint256 borrowedAmount,
         address msgSender
@@ -1043,25 +1517,30 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
         withLoan(
             pool,
             borrowedUnderlyingToken,
-            borrowedAmount = borrowedToken.borrowBalanceCurrent(msgSender)
+            borrowedAmount = ICERC20(address(borrowedToken)).borrowBalanceCurrent(msgSender)
         )
     {
         LoanHolder holder = new LoanHolder();
-        _enterMarket(holder, borrowedToken.comptroller(), address(collateralToken), address(borrowedToken));
+        _enterMarket(
+            holder,
+            ICERC20(address(borrowedToken)).comptroller(),
+            address(collateralToken),
+            address(borrowedToken)
+        );
 
         // Extract loan
         borrowedUnderlyingToken.universalApprove(address(borrowedToken), borrowedAmount);
-        borrowedToken.repayBorrowBehalf(msgSender, borrowedAmount);
+        ICERC20(address(borrowedToken)).repayBorrowBehalf(msgSender, borrowedAmount);
         collateralToken.universalTransferFrom(msgSender, address(holder), collateralAmount);
 
         // Create new loan
         holder.perform(address(borrowedToken), 0, abi.encodeWithSelector(
-            borrowedToken.borrow.selector,
+            ICERC20(address(borrowedToken)).borrow.selector,
             _getExpectedReturn()
         ));
 
         // Return loan
-        if (borrowedToken == ICERC20(0)) {
+        if (borrowedToken == IERC20(0)) {
             holder.perform(address(msgSender), _getExpectedReturn(), "");
         } else {
             holder.perform(address(borrowedUnderlyingToken), 0, abi.encodeWithSelector(
@@ -1077,50 +1556,52 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
 
     function mint(
         uint256 tokenId,
-        ICERC20 cToken,
+        IERC20 cToken,
         IERC20 token,
         uint256 amount
     )
         external
+        gasDiscount
         onlyTokenOwner(tokenId)
         payable
     {
         LoanHolder holder = LoanHolder(address(tokenId));
         if (tokenId == 0) {
             holder = new LoanHolder();
-            _enterMarket(holder, cToken.comptroller(), address(cToken), address(0));
+            _enterMarket(holder, ICERC20(address(cToken)).comptroller(), address(cToken), address(0));
             _mint(msg.sender, uint256(address(holder)));
         }
 
         token.universalTransferFrom(msg.sender, address(this), amount);
         token.universalApprove(address(token), amount);
         if (msg.value == 0) {
-            cToken.mint(amount);
+            ICERC20(address(cToken)).mint(amount);
         } else {
             (bool success,) = address(cToken).call.value(msg.value)(
                 abi.encodeWithSignature("mint()")
             );
             require(success, "");
         }
-        IERC20(address(cToken)).universalTransfer(
+        cToken.universalTransfer(
             address(holder),
-            IERC20(address(cToken)).universalBalanceOf(address(this))
+            cToken.universalBalanceOf(address(this))
         );
     }
 
     function redeem(
         uint256 tokenId,
-        ICERC20 cToken,
+        IERC20 cToken,
         IERC20 token,
         uint256 amount
     )
         external
+        gasDiscount
         onlyTokenOwner(tokenId)
     {
         LoanHolder holder = LoanHolder(address(tokenId));
 
         holder.perform(address(cToken), 0, abi.encodeWithSelector(
-            cToken.redeem.selector,
+            ICERC20(address(cToken)).redeem.selector,
             amount
         ));
 
@@ -1137,18 +1618,19 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
 
     function borrow(
         uint256 tokenId,
-        ICERC20 cToken,
+        IERC20 cToken,
         IERC20 token,
         uint256 amount
     )
         external
+        gasDiscount
         onlyTokenOwner(tokenId)
     {
         require(ownerOf(tokenId) == msg.sender, "Wrong tokenId");
         LoanHolder holder = LoanHolder(address(tokenId));
 
         holder.perform(address(cToken), 0, abi.encodeWithSelector(
-            cToken.borrow.selector,
+            ICERC20(address(cToken)).borrow.selector,
             amount
         ));
 
@@ -1165,17 +1647,18 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
 
     function repay(
         uint256 tokenId,
-        ICERC20 cToken,
+        IERC20 cToken,
         IERC20 token,
         uint256 amount
     )
         public
+        gasDiscount
         onlyTokenOwner(tokenId)
         payable
     {
         LoanHolder holder = LoanHolder(address(tokenId));
 
-        uint256 borrowAmount = cToken.borrowBalanceCurrent(msg.sender);
+        uint256 borrowAmount = ICERC20(address(cToken)).borrowBalanceCurrent(msg.sender);
         if (amount > borrowAmount) {
             amount = borrowAmount;
         }
@@ -1183,7 +1666,7 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
         token.universalTransferFrom(msg.sender, address(this), amount);
         token.universalApprove(address(cToken), amount);
         if (token != IERC20(0)) {
-            cToken.repayBorrowBehalf(address(holder), amount);
+            ICERC20(address(cToken)).repayBorrowBehalf(address(holder), amount);
         } else {
             (bool success,) = address(cToken).call.value(msg.value)(
                 abi.encodeWithSignature(
@@ -1193,5 +1676,14 @@ contract CompoundTokenization is ERC721, ILoanPoolLoaner {
             );
             require(success, "");
         }
+    }
+
+    function tokensOfOwner(address owner) external view returns (uint256[] memory) {
+        return _tokensOfOwner(owner);
+    }
+
+    function reclaimToken(IERC20 token) external onlyOwner {
+        uint256 balance = token.balanceOf(address(this));
+        token.universalTransfer(owner(), balance);
     }
 }
