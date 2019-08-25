@@ -8,49 +8,15 @@ import "./ILoanPool.sol";
 import "./ICERC20.sol";
 import "./LoanHolder.sol";
 import "./UniversalERC20.sol";
+import "./ILendingPool.sol";
 
-contract CompoundTokenization is ERC721, ERC721Metadata("Compound Position Token", "cPosition"), ILoanPoolLoaner, ITokenizer {
+contract AavesomeTokenization is ERC721, ERC721Metadata("Aavesome Position Token", "cPosition"), ILoanPoolLoaner, ITokenizer {
 
     using UniversalERC20 for IERC20;
 
     modifier onlyTokenOwner(uint256 tokenId) {
         require(tokenId == 0 || ownerOf(tokenId) == msg.sender, "Wrong tokenId");
         _;
-    }
-
-    function _enterMarket(
-        LoanHolder holder,
-        ICompoundController controller,
-        address cToken1,
-        address cToken2
-    )
-        internal
-        returns(LoanHolder)
-    {
-        holder.perform(address(controller), 0, abi.encodeWithSelector(
-            controller.enterMarkets.selector,
-            uint256(0x20), // offset
-            uint256(2),    // length
-            cToken1,
-            cToken2
-        ));
-    }
-
-    function enterMarkets(
-        uint256 tokenId,
-        address controller,
-        address[] calldata cTokens
-    )
-        external
-        onlyTokenOwner(tokenId)
-        returns(bytes memory ret)
-    {
-        LoanHolder holder = LoanHolder(address(tokenId));
-
-        ret = holder.perform(controller, 0, abi.encodeWithSelector(
-            ICompoundController(controller).enterMarkets.selector,
-            cTokens
-        ));
     }
 
     function migrate(
@@ -69,38 +35,40 @@ contract CompoundTokenization is ERC721, ERC721Metadata("Compound Position Token
             borrowedAmount = ICERC20(address(borrowedToken)).borrowBalanceCurrent(msgSender)
         )
     {
-        LoanHolder holder = new LoanHolder();
-        _enterMarket(
-            holder,
-            ICERC20(address(borrowedToken)).comptroller(),
-            address(collateralToken),
-            address(borrowedToken)
-        );
+//        TODO: Support migration
 
-        // Extract loan
-        borrowedUnderlyingToken.universalApprove(address(borrowedToken), borrowedAmount);
-        ICERC20(address(borrowedToken)).repayBorrowBehalf(msgSender, borrowedAmount);
-        collateralToken.universalTransferFrom(msgSender, address(holder), collateralAmount);
-
-        // Create new loan
-        holder.perform(address(borrowedToken), 0, abi.encodeWithSelector(
-            ICERC20(address(borrowedToken)).borrow.selector,
-            _getExpectedReturn()
-        ));
-
-        // Return loan
-        if (borrowedToken == IERC20(0)) {
-            holder.perform(address(msgSender), _getExpectedReturn(), "");
-        } else {
-            holder.perform(address(borrowedUnderlyingToken), 0, abi.encodeWithSelector(
-                borrowedUnderlyingToken.transfer.selector,
-                address(pool),
-                _getExpectedReturn()
-            ));
-        }
-
-        // Transfer position
-        _mint(msgSender, uint256(address(holder)));
+//        LoanHolder holder = new LoanHolder();
+//        _enterMarket(
+//            holder,
+//            ICERC20(address(borrowedToken)).comptroller(),
+//            address(collateralToken),
+//            address(borrowedToken)
+//        );
+//
+//        // Extract loan
+//        borrowedUnderlyingToken.universalApprove(address(borrowedToken), borrowedAmount);
+//        ICERC20(address(borrowedToken)).repayBorrowBehalf(msgSender, borrowedAmount);
+//        collateralToken.universalTransferFrom(msgSender, address(holder), collateralAmount);
+//
+//        // Create new loan
+//        holder.perform(address(borrowedToken), 0, abi.encodeWithSelector(
+//            ICERC20(address(borrowedToken)).borrow.selector,
+//            _getExpectedReturn()
+//        ));
+//
+//        // Return loan
+//        if (borrowedToken == IERC20(0)) {
+//            holder.perform(address(msgSender), _getExpectedReturn(), "");
+//        } else {
+//            holder.perform(address(borrowedUnderlyingToken), 0, abi.encodeWithSelector(
+//                borrowedUnderlyingToken.transfer.selector,
+//                address(pool),
+//                _getExpectedReturn()
+//            ));
+//        }
+//
+//        // Transfer position
+//        _mint(msgSender, uint256(address(holder)));
     }
 
     function mint(

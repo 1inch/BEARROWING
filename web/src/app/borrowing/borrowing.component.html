@@ -21,7 +21,7 @@
 
             <div class="row">
 
-                <div *ngIf="!resultPools.length && loading" class="col-12 mb-3 mt-md-0 text-center">
+                <div *ngIf="(!resultPools.length && loading && web3Service.walletAddress) || (resultPools.length && loading && !web3Service.walletAddress)" class="col-12 mb-3 mt-md-0 text-center">
                     <app-loading-spinner></app-loading-spinner>
                 </div>
                 <div *ngIf="!resultPools.length && !loading && !notConnected"
@@ -66,40 +66,40 @@
                     </button>
                 </div>
                 <div *ngFor="let pool of resultPools" class="col-12 col-md-6 mb-4 mt-md-0">
-                    <div class="card" style="min-height: 360px;">
-                        <div class="card-body">
-                            <h5 class="card-title border-bottom pb-2 d-flex justify-content-between">
+                        <div *ngIf="web3Service.walletAddress" class="card" style="min-height: 360px;">
+                            <div class="card-body">
+                                <h5 class="card-title border-bottom pb-2 d-flex justify-content-between">
                                 <span>
                                     <img [src]="'assets/' + pool.icon" width="32"> {{pool.name}}
                                     <span class="text-success">
                                         {{pool.collateralisation}}% <sup>lending/borrowing</sup>
                                     </span>
                                 </span>
-                                <button (click)="migrateFromPool(pool)" *ngIf="pool.id.indexOf('nft') === -1"
-                                        class="badge badge-secondary position-absolute" style="right: 20px;">
-                                    <fa-icon [icon]="fileInvoiceDollarIcon"></fa-icon>
-                                    migrate
-                                </button>
-                            </h5>
-                            <div class="card-text row">
-                                <div class="col-12 col-md-6 text-center border-right">
-                                    <h5
-                                        *ngIf="pool.tokensWithBalance"
-                                        class="border-bottom pb-2"
-                                        style="font-weight: 300;"
-                                    >Collateral</h5>
-                                    <table class="table mb-0">
-                                        <tr *ngFor="let token of pool.tokensWithBalance">
-                                            <td class="border-top-0 text-left p-1">
-                                                {{token.balance}}
-                                            </td>
-                                            <td class="border-top-0 text-left p-1" style="white-space: nowrap;">
-                                                <img [ngClass]="'token-' + token.symbol.toLowerCase()"
-                                                     [src]="'assets/tokens/' + token.address.toLowerCase() + '.png'"
-                                                     width="22">&nbsp;
-                                                {{token.symbol}}
-                                            </td>
-                                            <td class="border-top-0 text-right p-1">
+                                    <button (click)="migrateFromPool(pool)" *ngIf="pool.id.indexOf('nft') === -1"
+                                            class="badge badge-secondary position-absolute" style="right: 20px;">
+                                        <fa-icon [icon]="fileInvoiceDollarIcon"></fa-icon>
+                                        migrate
+                                    </button>
+                                </h5>
+                                <div class="card-text row">
+                                    <div class="col-12 col-md-6 text-center border-right">
+                                        <h5
+                                            *ngIf="pool.tokensWithBalance"
+                                            class="border-bottom pb-2"
+                                            style="font-weight: 300;"
+                                        >Collateral</h5>
+                                        <table class="table mb-0">
+                                            <tr *ngFor="let token of pool.tokensWithBalance">
+                                                <td class="border-top-0 text-left p-1">
+                                                    {{token.balance}}
+                                                </td>
+                                                <td class="border-top-0 text-left p-1" style="white-space: nowrap;">
+                                                    <img [ngClass]="'token-' + token.symbol.toLowerCase()"
+                                                         [src]="'assets/tokens/' + token.address.toLowerCase() + '.png'"
+                                                         width="22">&nbsp;
+                                                    {{token.symbol}}
+                                                </td>
+                                                <td class="border-top-0 text-right p-1">
                                                 <span style="white-space: nowrap;">
                                                     <button (click)="openLendModal(pool, token)"
                                                             class="badge badge-success">
@@ -110,41 +110,43 @@
                                                         <fa-icon [icon]="minusCircleIcon"></fa-icon>
                                                     </button>
                                                 </span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="border-top-0" colspan="3">
-                                                <div *ngIf="pool.tokensWithBalance.length != 1" [ngClass]="pool.tokensWithBalance ? 'border-top' : ''"
-                                                     class="pt-2">
-                                                    <button (click)="openNewLendModal(pool)"
-                                                            class="badge badge-success">
-                                                        <fa-icon [icon]="plusCircleIcon"></fa-icon>
-                                                        new
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border-top-0" colspan="3">
+                                                    <div
+                                                        *ngIf="pool.tokensWithBalance && pool.tokensWithBalance.length != 1"
+                                                        [ngClass]="pool.tokensWithBalance ? 'border-top' : ''"
+                                                        class="pt-2">
+                                                        <button (click)="openNewLendModal(pool)"
+                                                                class="badge badge-success">
+                                                            <fa-icon [icon]="plusCircleIcon"></fa-icon>
+                                                            new
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
 
-                                <div class="col-12 col-md-6 text-center">
-                                    <h5
-                                        *ngIf="pool.tokensWithBorrowedBalance"
-                                        class="border-bottom pb-2"
-                                        style="font-weight: 300;"
-                                    >Debt</h5>
-                                    <table class="table">
-                                        <tr *ngFor="let token of pool.tokensWithBorrowedBalance">
-                                            <td class="border-top-0 text-left p-1">
-                                                {{token.balance}}
-                                            </td>
-                                            <td class="border-top-0 text-left p-1">
-                                                <img [ngClass]="'token-' + token.symbol.toLowerCase()"
-                                                     [src]="'assets/tokens/' + token.address.toLowerCase() + '.png'"
-                                                     width="22">&nbsp;
-                                                {{token.symbol}}
-                                            </td>
-                                            <td class="border-top-0 text-right p-1">
+                                    <div class="col-12 col-md-6 text-center">
+                                        <h5
+                                            *ngIf="pool.tokensWithBorrowedBalance"
+                                            class="border-bottom pb-2"
+                                            style="font-weight: 300;"
+                                        >Debt</h5>
+                                        <table class="table">
+                                            <tr *ngFor="let token of pool.tokensWithBorrowedBalance">
+                                                <td class="border-top-0 text-left p-1">
+                                                    {{token.balance}}
+                                                </td>
+                                                <td class="border-top-0 text-left p-1">
+                                                    <img [ngClass]="'token-' + token.symbol.toLowerCase()"
+                                                         [src]="'assets/tokens/' + token.address.toLowerCase() + '.png'"
+                                                         width="22">&nbsp;
+                                                    {{token.symbol}}
+                                                </td>
+                                                <td class="border-top-0 text-right p-1">
                                                 <span style="white-space: nowrap;">
                                                     <button (click)="openBorrowModal(pool, token)"
                                                             class="badge badge-success">
@@ -155,27 +157,29 @@
                                                         <fa-icon [icon]="minusCircleIcon"></fa-icon>
                                                     </button>
                                                 </span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="border-top-0" colspan="3">
-                                                <div *ngIf="pool.tokensWithBorrowedBalance.length != 1" [ngClass]="pool.tokensWithBorrowedBalance ? 'border-top' : ''"
-                                                     class="pt-2">
-                                                    <button (click)="openNewLendModal(pool)"
-                                                            class="badge badge-success">
-                                                        <fa-icon [icon]="plusCircleIcon"></fa-icon>
-                                                        new
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </table>
-                                </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td class="border-top-0" colspan="3">
+                                                    <div
+                                                        *ngIf="pool.tokensWithBorrowedBalance && pool.tokensWithBorrowedBalance.length != 1"
+                                                        [ngClass]="pool.tokensWithBorrowedBalance ? 'border-top' : ''"
+                                                        class="pt-2">
+                                                        <button (click)="openNewLendModal(pool)"
+                                                                class="badge badge-success">
+                                                            <fa-icon [icon]="plusCircleIcon"></fa-icon>
+                                                            new
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
 
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
             </div>
 
         </div>
